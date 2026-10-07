@@ -118,5 +118,9 @@ What a great note to end on.  ROCK ON, I meant to say!  ;)
 My notebook of stuff that I was going to address before I pushed this out the door, before I decided that was higher priority than I'd felt at first and published this partially refactored version.
 
 
+## Regarding Presumed Performace Standards and Stress Tests
 
+It lately occurs to me that some will complain because my note picker doesn't deal with things like harmonics and bends and whatnot, or even care what octave the incoming note is.  This is because I designed it for myself - and what I want is for it to just lay out a nice harmonic canvas and leave the tricks to me.  I therefore didn't even try to solve those problems.
+
+Same thing with stress tests.  I've been asked how it'd be if someone somehow interfaced it with JACK and there was a zillion user patches in that, and honestly my prediction is that Enlivener would break pretty quicky under any sustained assault like that.  Again I built it for myself and my needs, so if you can proof it against that, all power to you.
 
