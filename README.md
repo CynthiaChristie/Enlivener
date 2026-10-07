@@ -87,9 +87,7 @@ Where `drums.wav` is a precisely trimmed drum track at the desired tempo. Short 
 If you find the app is running, displaying the "Ok, start playing" message but not responding to the guitar, and you know the "mic" (guitar) is not muted or anything like that, go to your pulse mixer and try adjusting something called "enlivener analysis."  I've got my sound card input (guitar) almost pegged, and the "enlivener analysis" slider at about 3/4.
 ## 📜 On Myself and Why I'm Doing This
 
-I was mostly a construction worker during my working life and just happen to know C from reading K&R in 1991, and having that as a hobby since then, being as I also have been Linuxing since 94, starting with Slackware. That's about all I have in common with my idea of the usual folks in the general developer community. I'm not really culturally like you guys. I don't dislike you or anything but I don't really give a shit about your "Holy Wars" or any bullshit like that, other than a firm opinion that programming languages other than C are strictly for children, a very usual stance among you guys I'm guessing.
-
-(It's a joke, calm down!)
+I was mostly a construction worker during my working life and just happen to know C from reading K&R in 1991, and having that as a hobby since then, being as I also have been Linuxing since 94, starting with Slackware. That's about all I have in common with my idea of the usual folks in the general developer community. I'm not really culturally like you guys. I'm probably not going to be interested in talking about things like K&R styling or whatever departures I've made from conventions I don't even know about.  I had a thing that I thought would be fun for everyone so here it is.  That's it.  Do what you will now but I'm going back to playing guitar.
 ## ⚖️ Licensing & Derivatives (CC BY-NC-SA 4.0)
 
 Project Enlivener is published under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International Public License (CC BY-NC-SA 4.0).
