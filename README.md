@@ -82,7 +82,7 @@ Look in the `enlivener.h` file for a string constant called `SYNTH_EXECUTABLE`. 
 enlivener drums.wav b120 100 100
 ```
 
-Where `drums.wav` is a precisely trimmed drum track at the desired tempo. Short loops provide optimal stability, though extended tracks are supported. The `b120` parameter dictates the execution tempo; replace `120` with any integer from the defensive 120 to 240 BPM execution cap. The optional trailing integers define volume scaling for the bass and drum outputs, respectively, ranging from 0 to 100.
+Where `drums.wav` is a precisely trimmed drum track at the desired tempo. Short loops provide optimal stability, though extended tracks are supported. The `b120` parameter dictates the execution tempo; replace `120` with any integer from 120 to 240 BPM. The optional trailing integers define volume scaling for the bass and drum outputs, respectively, ranging from 0 to 100.
 
 If you find the app is running, displaying the "Ok, start playing" message but not responding to the guitar, and you know the "mic" (guitar) is not muted or anything like that, go to your pulse mixer and try adjusting something called "enlivener analysis."  I've got my sound card input (guitar) almost pegged, and the "enlivener analysis" slider at about 3/4.
 ## 📜 On Myself and Why I'm Doing This
