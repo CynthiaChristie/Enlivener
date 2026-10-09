@@ -82,7 +82,7 @@ Look in the `enlivener.h` file for a string constant called `SYNTH_EXECUTABLE`. 
 enlivener drums.wav b120 100 100
 ```
 
-Where `drums.wav` is a precisely trimmed drum track at the desired tempo. Short loops provide optimal stability, though extended tracks are supported. The `b120` parameter dictates the execution tempo; replace `120` with any integer from 120 to 240 BPM. The optional trailing integers define volume scaling for the bass and drum outputs, respectively, ranging from 0 to 100.
+Where `drums.wav` is a precisely trimmed drum track at the desired tempo. Short loops provide optimal stability, though extended tracks are supported. The `b120` parameter dictates the execution tempo; replace `120` with any integer from 60 to 240 BPM. The optional trailing integers define volume scaling for the bass and drum outputs, respectively, ranging from 0 to 100.
 
 Also, if the drum track name has a number from 120 to 240 embedded in it, Enlivener will take that to mean that the drum track is at that bpm and if a different value is specified by b### on the command line, it will run a simple stretch/squash algorithm to make the drum track fit the requested tempo.
 

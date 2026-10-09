@@ -253,11 +253,11 @@ int	second_tone;
 			if(sample_int<-32768)sample_int=-32768;
 			buf[c*2]=sample_int;
 			
-			sample_int=buf[c*2];
+			sample_int=buf[(c*2)+1];
 			sample_int+=icing_overplay[c];
 			if(sample_int>32767)sample_int=32767;
 			if(sample_int<-32768)sample_int=-32768;
-			buf[c*2]=sample_int;
+			buf[(c*2)+1]=sample_int;
 		}
 		icing_have_overplay=false;
 	}
@@ -466,36 +466,37 @@ case 3:		octave=(rand()%2)*12;
 		}
 		break;
 		
-case 4:		octave=(rand()%2)*12;
+case 4:	 	octave=(rand()%2)*12;
 		l_offset=(rand()%ICING_OFFSET);
 		r_offset=(rand()%ICING_OFFSET);
 		icing_have_overplay=true;
 		
 		for(c=0;c<SINE_QUARTER*4;c++) {
-			if(l_offset<SINE_QUARTER*2) {
-				sample_int=buf[l_offset*2];
+			if((c+l_offset)<SINE_QUARTER*2) {  // *
+				sample_int=buf[(c+l_offset)*2]; // *
 				sample_int+=icing[this_ice+octave]->whole[c];
 				if(sample_int>32767) sample_int=32767;
 				if(sample_int<-32768) sample_int=-32768;
-				buf[l_offset*2]=sample_int;
+				buf[(c+l_offset)*2]=sample_int; // *
 			} else {
-				if(l_offset<SINE_QUARTER*4)
-				icing_overplay[(l_offset-(SINE_QUARTER*2))*2]
-				=icing[this_ice+octave]->whole[c];	
+				if((c+l_offset)<SINE_QUARTER*4)
+				icing_overplay[(c+l_offset-(SINE_QUARTER*2))*2]
+				=icing[this_ice+octave]->whole[c]; // *	
 			}	
 			
-			if(r_offset<SINE_QUARTER*2) {
-				sample_int=buf[(r_offset*2)+1];
+			if((c+r_offset)<SINE_QUARTER*2) {
+				sample_int=buf[((c+r_offset)*2)+1]; // *
 				sample_int+=icing[this_ice+octave]->whole[c];
 				if(sample_int>32767) sample_int=32767;
 				if(sample_int<-32768) sample_int=-32768;
-				buf[(r_offset*2)+1]=sample_int;
+				buf[((c+r_offset)*2)+1]=sample_int;
 			} else {
-				if(r_offset<SINE_QUARTER*4)
-				icing_overplay[((r_offset-(SINE_QUARTER*2))*2)+1]
+				if((c+r_offset)<SINE_QUARTER*4)
+				icing_overplay[(((c+r_offset)
+				-(SINE_QUARTER*2))*2)+1]
 				=icing[this_ice+octave]->whole[c];	
 			}	
-		}
+		} 
 }
 	}
 //	for(;;) {
