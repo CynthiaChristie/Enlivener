@@ -786,8 +786,8 @@ int	c;
 int	fade;
 int	fade_pos;
 int	sample_int_l,sample_int_r;
-int	attack;
-int	this_attack;
+//int	attack;
+//int	this_attack;
 int	attack_len;
 int	bend_index;
 
@@ -851,7 +851,8 @@ int	mute_early;
 	while(fade>count)fade/=2;
 
 		
-	attack=(rand()%(BASS_ATTACK-BASS_ATTACK_MIN))+BASS_ATTACK_MIN;
+//	attack=(rand()%(BASS_ATTACK-BASS_ATTACK_MIN))+BASS_ATTACK_MIN;
+
 
 	attack_len=(BASS_ATTACK_LEN>(count-fade))?(count-fade):BASS_ATTACK_LEN;		
 
@@ -1041,7 +1042,7 @@ fifth_variance_r=(rand()%(TRANSVERSE_VARIANCE-TRANS_VARIANCE_MIN)+TRANS_VARIANCE
 		sample_int_r=buf[(c*2)+1];
 		sample_int_r*=c;
 		sample_int_r/=(attack_len/4);
-		buf[c*2]=sample_int_r;
+		buf[(c*2)+1]=sample_int_r;
 	}
 
 }
