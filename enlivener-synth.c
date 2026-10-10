@@ -1066,9 +1066,10 @@ char	drumname[256];
 	
 	if(dat_fd!=-1) {
 		c=read(dat_fd,&dat_header,sizeof(BEATS_HEADER));
-		if((c==sizeof(BEATS_HEADER))&&(dat_header.created_by==basspid))
+	if((c==sizeof(BEATS_HEADER))&&(dat_header.created_by==basspid)) {
 			stereo=dat_header.stereo;
 			rate=dat_header.rate;
+		}
 	} else {
 		have_drums=false;
 		printf("synth: Can't open drums file!\n");
