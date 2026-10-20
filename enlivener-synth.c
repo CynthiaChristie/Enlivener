@@ -190,7 +190,7 @@ void		play_something();
 void 		read_drums();
 void		humanize_vol();
 void		make_waves();
-void		mute_previous();
+// void		mute_previous();
 void		collect_waves();
 void		pivotSort();
 unsigned char	sort_note_entry();
@@ -221,7 +221,6 @@ int	octave;			// Tone selection offset that is always
 int	r_offset;		// Offsets for stereo "airy" effect.
 int	l_offset;		// The "Haas Effect" I've learned it's called.
 
-
 bool	have_this[12];
 
 int	ice_tones[12];
@@ -229,9 +228,10 @@ int	ice_tones_index;
 
 int	this_ice;
 
-int	first_tone;
-int	second_tone;
+// int	first_tone;
+// int	second_tone;
 
+short	*target_sample;
 
 	ice_tones_index=0;
 
@@ -245,22 +245,26 @@ int	second_tone;
 // sources and write notes accordingly all over the buffer according to the
 // logic driven by misc rand() calls.
 
-	if(icing_have_overplay) {
-		for(c=0;c<SINE_QUARTER*2;c++) {
+//	if(icing_have_overplay) {
+		for(c=0;c<((SINE_QUARTER*
+		(icing_have_overplay?2:0)
+		)+ICING_OFFSET);c++) {
 			sample_int=buf[c*2];
-			sample_int+=icing_overplay[c];
+			sample_int+=icing_overplay[c*2];
+			icing_overplay[c*2]=0;
 			if(sample_int>32767)sample_int=32767;
 			if(sample_int<-32768)sample_int=-32768;
 			buf[c*2]=sample_int;
 			
 			sample_int=buf[(c*2)+1];
-			sample_int+=icing_overplay[c];
+			sample_int+=icing_overplay[(c*2)+1];
+			icing_overplay[(c*2)+1]=0;
 			if(sample_int>32767)sample_int=32767;
 			if(sample_int<-32768)sample_int=-32768;
 			buf[(c*2)+1]=sample_int;
 		}
 		icing_have_overplay=false;
-	}
+//	}
 	for(c=0;c<12;c++) have_this[c]=false;
 	
 	for(c=0;c<accents_count;c++) {
@@ -276,9 +280,9 @@ int	second_tone;
 		ice_tones_index++;
 		have_this[c]=true;
 	}
-//}
 
-	for(c=0;c<12;c++) have_this[c]=false;
+
+//	for(c=0;c<12;c++) have_this[c]=false;
 	
 	octave=0;
 	
@@ -289,63 +293,112 @@ int	second_tone;
 		r_offset=(rand()%ICING_OFFSET);
 		
 		for(c=0;c<SINE_QUARTER*2;c++) {
-			sample_int=buf[(c+l_offset)*2];
+
+			target_sample=((c+l_offset)<(SINE_QUARTER*2))
+			?&(buf[(c+l_offset)*2]):
+			&(icing_overplay[(c+l_offset)-(SINE_QUARTER*2)]);
+			
+
+//			sample_int=buf[(c+l_offset)*2];
+
+			sample_int=*target_sample;
 			sample_int+=icing[ps_tones[0]+octave]->half[c];
 			
 			if(sample_int>32767) sample_int=32767;
 			if(sample_int<-32768) sample_int=-32768;
 			
-			buf[(c+l_offset)*2]=sample_int;
+//			buf[(c+l_offset)*2]=sample_int;
+			*target_sample=sample_int;
 			
-			sample_int=buf[((c+r_offset)*2)+1];
+			target_sample=((c+r_offset)<(SINE_QUARTER*2))
+			?&(buf[((c+r_offset)*2)+1]):
+			&(icing_overplay[(c+r_offset)-(SINE_QUARTER*2)]);
+						
+			sample_int=*target_sample;
+			
+//			sample_int=buf[((c+r_offset)*2)+1];
 			sample_int+=icing[ps_tones[0]+octave]->half[c];
 			
 			if(sample_int>32767) sample_int=32767;
 			if(sample_int<-32768) sample_int=-32768;
-			
-			buf[((c+r_offset)*2)+1]=sample_int;
+
+			*target_sample=sample_int;			
+//			buf[((c+r_offset)*2)+1]=sample_int;
 		}
 		l_offset=(rand()%ICING_OFFSET);
 		r_offset=(rand()%ICING_OFFSET);
 		octave=(rand()%2)*12;
 		if(rand()%2)
 		for(c=0;c<SINE_QUARTER*2;c++) {
-			sample_int=buf[(c+l_offset)*2];
+		
+			target_sample=((c+l_offset)<(SINE_QUARTER*2))
+			?&(buf[(c+l_offset)*2]):
+			&(icing_overplay[(c+l_offset)-(SINE_QUARTER*2)]);
+			
+
+//			sample_int=buf[(c+l_offset)*2];
+
+			sample_int=*target_sample;
 			sample_int+=icing[ps_tones[1]+octave]->half[c];
 			
 			if(sample_int>32767) sample_int=32767;
 			if(sample_int<-32768) sample_int=-32768;
 			
-			buf[(c+l_offset)*2]=sample_int;
+//			buf[(c+l_offset)*2]=sample_int;
+			*target_sample=sample_int;
 			
-			sample_int=buf[((c+r_offset)*2)+1];
+			target_sample=((c+r_offset)<(SINE_QUARTER*2))
+			?&(buf[((c+r_offset)*2)+1]):
+			&(icing_overplay[(c+r_offset)-(SINE_QUARTER*2)]);
+						
+			sample_int=*target_sample;
+			
+//			sample_int=buf[((c+r_offset)*2)+1];
 			sample_int+=icing[ps_tones[1]+octave]->half[c];
 			
 			if(sample_int>32767) sample_int=32767;
 			if(sample_int<-32768) sample_int=-32768;
-			
-			buf[((c+r_offset)*2)+1]=sample_int;
+
+			*target_sample=sample_int;			
+//			buf[((c+r_offset)*2)+1]=sample_int;
 		}
 		l_offset=(rand()%ICING_OFFSET);
 		r_offset=(rand()%ICING_OFFSET);
 		octave=(rand()%2)*12;
 		if(rand()%2)
 		for(c=0;c<SINE_QUARTER*2;c++) {
-			sample_int=buf[(c+l_offset)*2];
+		
+		
+			target_sample=((c+l_offset)<(SINE_QUARTER*2))
+			?&(buf[(c+l_offset)*2]):
+			&(icing_overplay[(c+l_offset)-(SINE_QUARTER*2)]);
+			
+
+//			sample_int=buf[(c+l_offset)*2];
+
+			sample_int=*target_sample;
 			sample_int+=icing[ps_tones[2]+octave]->half[c];
 			
 			if(sample_int>32767) sample_int=32767;
 			if(sample_int<-32768) sample_int=-32768;
 			
-			buf[(c+l_offset)*2]=sample_int;
+//			buf[(c+l_offset)*2]=sample_int;
+			*target_sample=sample_int;
 			
-			sample_int=buf[((c+r_offset)*2)+1];
+			target_sample=((c+r_offset)<(SINE_QUARTER*2))
+			?&(buf[((c+r_offset)*2)+1]):
+			&(icing_overplay[(c+r_offset)-(SINE_QUARTER*2)]);
+						
+			sample_int=*target_sample;
+			
+//			sample_int=buf[((c+r_offset)*2)+1];
 			sample_int+=icing[ps_tones[2]+octave]->half[c];
 			
 			if(sample_int>32767) sample_int=32767;
 			if(sample_int<-32768) sample_int=-32768;
-			
-			buf[((c+r_offset)*2)+1]=sample_int;
+
+			*target_sample=sample_int;			
+//			buf[((c+r_offset)*2)+1]=sample_int;
 		}
 	} else {
 this_ice=ice_tones[rand()%ice_tones_index];
@@ -356,6 +409,7 @@ case 0:
 		l_offset=(rand()%ICING_OFFSET);
 		r_offset=(rand()%ICING_OFFSET);
 		for(c=0;c<SINE_QUARTER;c++) {
+		
 			sample_int=buf[(c+l_offset)*2];
 			sample_int+=icing[this_ice+octave]->quarter[c];
 			
@@ -479,7 +533,7 @@ case 4:	 	octave=(rand()%2)*12;
 				if(sample_int<-32768) sample_int=-32768;
 				buf[(c+l_offset)*2]=sample_int; // *
 			} else {
-				if((c+l_offset)<SINE_QUARTER*4)
+			//	if((c+l_offset)<SINE_QUARTER*4)
 				icing_overplay[(c+l_offset-(SINE_QUARTER*2))*2]
 				=icing[this_ice+octave]->whole[c]; // *	
 			}	
@@ -491,7 +545,7 @@ case 4:	 	octave=(rand()%2)*12;
 				if(sample_int<-32768) sample_int=-32768;
 				buf[((c+r_offset)*2)+1]=sample_int;
 			} else {
-				if((c+r_offset)<SINE_QUARTER*4)
+			//	if((c+r_offset)<SINE_QUARTER*4)
 				icing_overplay[(((c+r_offset)
 				-(SINE_QUARTER*2))*2)+1]
 				=icing[this_ice+octave]->whole[c];	
@@ -738,6 +792,8 @@ int	oldest_index;
 // I knew why this months ago when I wrote it but I don't now.  (Oct 2026)
 //
 // Now I do.  It's because icing whole notes will abruptly end.
+
+/*
 void mute_previous(buf)
 short *buf;
 {
@@ -747,7 +803,7 @@ int	c;
 int	sample_int;
 int	mute_index;
 
-	if(/*(*buf==0)||*/(buf==audio)) return;
+	if(buf==audio) return;
 
 	mute_index=(rand()%(MUTE_PREVIOUS-MUTE_PREVIOUS_MIN))+MUTE_PREVIOUS_MIN;
 		
@@ -773,7 +829,7 @@ int	mute_index;
 	}
 }
 
-
+*/
 //
 // Introduce random microvariations in the volume to sound less mechanical
 //
@@ -836,7 +892,7 @@ int	mute_early;
 	
 	harmonic=false;
 	
-	mute_previous(buf);
+//	mute_previous(buf);
 		
 	if(rand()%2)bend_index=0;
 	else bend_index=(rand()%(BEND_MAX-1))+1;
@@ -1460,7 +1516,7 @@ if((rand()%3)>0) {		// bar overall type 1
 	}
 }
 do_icing(audio,tones);
-mute_previous(&(audio[SINE_QUARTER*4]));
+// mute_previous(&(audio[SINE_QUARTER*4]));
 			
 
 } else {
@@ -1755,7 +1811,7 @@ pa_index_out = pa_simple_new(NULL,               // Use the default server.
 	
 	// *2 for half not quarter, *2 for stereo
 	// half because the overplay only is half, not whole
-	icing_overplay=malloc(SINE_QUARTER*4*sizeof(short));
+	icing_overplay=malloc(((SINE_QUARTER*2)+ICING_OFFSET)*2*sizeof(short));
 
 	kill(basspid,SIGUSR1);
 	

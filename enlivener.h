@@ -184,7 +184,7 @@ typedef struct {
 } ICING;
 
 #define ICING_LEVEL	8192
-#define	ICING_OFFSET	256
+#define	ICING_OFFSET	3072
 
 typedef struct {
 	int tone;

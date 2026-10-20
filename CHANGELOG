@@ -1,0 +1,27 @@
+Oct 20, 2026
+
+Work with synth:
+
+Took out mute_previous() - remains in commented form but probably for the chop
+
+General about do_icing()
+
+have_this[] found not to be useless as alleged in dev_questions.txt
+
+Widened Hass effect in do_icing() (ICING_OFFSET) and found click and did a general fix to address this:
+
+	expanded icing_overplay to allow for ICING_OFFSET
+	removed restrainer that formerly accounted for lack of about in case 4
+	Fixed apparent truncation of whole notes to 3/4 notes.
+	Fixed copy error in overplay buffer
+	Zeroed overplay in copy loop.
+	Made overplay copier do at least ICING_OFFSET if no whole notes.
+	Made wholes and triads copy Haas extended overplay to new expanded buffer.
+	Widened Haas effect even more
+	
+Oct 20 Cont'd
+
+	Took out superfluous division operation at end of cancel check
+	
+	Moved the synth_proceed to just before the banner.  Not sure that fixed the intro hiccup.
+	

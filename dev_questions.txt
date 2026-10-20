@@ -26,8 +26,6 @@ Ancient wisdom, many word, few point.
 --
 
 
-Do we need to do the final division operation in cancel_check() - Later note: Pretty sure fuckin no.  It used to be that len was the length of a cycle back in the mid Pliestocene but now it's just whatever we read from the input buffer, so next real check fix it and do a real test.
-
 
 Is PHASE_PERCENT supposed to be 100?  Really?  Well it works.  Can PHASE_PERCENT
 be legacied?  That means the "most_roots" fallback picker is cooked, doesn't it?
@@ -49,7 +47,7 @@ create bool flags for all argv[] conditions so the repeat loophole is closed.
 
 Check if we need synth_ready anywhere but that one place.
 
-Can the "synth start" signal be sooner?  There's a one time latency penalty at startup that's not repeated when it wakes up from a silence-induced idle.  I bet that's why.  -- Later note: There seems to be confident predictions in the comments that the synth will initialize faster than the front and there's utterly no way it does because it's the thing that takes many seconds to generate all those complicated bass waves.  Not fixing it right now because slightly sleepy and almost greened out, but next time just do it, ok?
+Can the "synth start" signal be sooner?  There's a one time latency penalty at startup that's not repeated when it wakes up from a silence-induced idle.  I bet that's why.  -- Later note: moved it to just before the banner, but not sure it's helping the hiccup thing.
 
 And while you're at it just fuckin get rid of this shit, the keyboard and the timer.  Don't forget the planned exit, just fuckin get rid of all that shit.
 
@@ -67,9 +65,7 @@ It could be made too that the front could make multiple children and share the s
 I'm probably not doing all that shit though.
 --
 
-The bool array have_this in do_icing() appears to do utterly fuck all.  In fact it seems to be initialized to false, carefully set, and then initialized to false again and never hence referred to, so that's not fucking embarrassing at all.
-
-Do we give a shit that icing whole notes have the very tail cut off because of the Haas Effect offset causing it to be past the icing_overplay endpoint and thus not be copied?  I don't hear clicks so I don't really think so.
+Do we give a shit that icing whole notes have the very tail cut off because of the Haas Effect offset causing it to be past the icing_overplay endpoint and thus not be copied?  I don't hear clicks so I don't really think so. --  Later note: Yes, we do. Expanded icing_overplay to account for this.
 
 
 

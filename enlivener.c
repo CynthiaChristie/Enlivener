@@ -542,6 +542,11 @@ else synth_exe=SYNTH_EXECUTABLE;
 	tcsetattr(STDIN_FILENO, TCSANOW, &new_attr);
 
 
+	// One time switch to prevent the synth initializing faster than the
+	// front, which it will, and having undefined behavior		
+	front_info->synth_proceed=true;
+	
+	
 
 
 putchar('\n');
@@ -561,7 +566,7 @@ for(;;) {
 
 
 // local object to handle user input
-char	user_keys[3];
+// char	user_keys[3];
 
 	// Find the number of columns so the \r character works correctly.
 	// It's in the loop because the user might resize it.
@@ -622,9 +627,7 @@ char	user_keys[3];
 		
 	} else {
 
-	// One time switch to prevent the synth initializing faster than the
-	// front, which it will, and having undefined behavior		
-	front_info->synth_proceed=true;
+
 	
 	// Start the display timer
 	if(first_run)start_time=NANONANO;
@@ -1809,7 +1812,7 @@ if(	((avg>=0)&&(aud[c]>=0)) || ((avg<=0)&&(aud[c]<=0)) ) {
 
 	// Adjust by wave period so lower notes are not inappropriately 
 	// weighted.
-	use_phase->benefit/=len;
+//	use_phase->benefit/=len;
 }
 
 
