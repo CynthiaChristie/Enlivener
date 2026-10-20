@@ -71,8 +71,11 @@ void 		write_beat_dat();	// Translate that into an internal format
 int		get_file_bpm();		// try to get a bpm out of the drum file
 					// name
 					
-short		*retime();	// Wave stretcher for if the drum file doesn't
-				// do the bpm boundary cleanly.
+short		*retime();	// Wave stretcher for if the bpm is both
+				// specified by an argv being b### and
+				// it finds a valid bpm in the drum file name.
+				// The drum file is streched to fit the
+				// argv bpm.  No pitch compensation is done.
 
 char		*tone_set_str();	// Formatter of the list of tones
 					// the synth reports that it understands
@@ -207,6 +210,13 @@ bool		first_run;
 
 
 // Related to the timer and planned finishes
+
+// Note: The timer is broken in the current version.  It only exists because
+// during the development period I was gonna get this community center lady
+// to play one of my demos at her weekly dance event.  The timer worked then
+// but a lot else about it was messed up.  It's a good tradeoff but since
+// the release was rushed, there's a broken timer.
+
 long		start_time;
 long		elapsed;
 
@@ -301,7 +311,8 @@ struct sigaction sa;
 // misc other initializing
 	rate=48000;
 	synth_ready=false;
-	bpm=150;
+	bpm=150; // This is not the functional default so maybe make it
+		// consistent.
 		
 	signal(SIGINT,exit_cleanly);
 	signal(SIGUSR1,set_synth_state);
@@ -829,6 +840,8 @@ int	note_candidate_count;	// Which, not every note is.
 	if(phase[phase_index]->benefit==0)break;
 
 // And even of those, only consider the top PHASE_PERCENT of that.
+//
+// I fuckin hate this word, but this is set to be deprecated I think.
 	phase_index=(phase_index*PHASE_PERCENT)/100;
 		
 // Clear any garbage from this array
@@ -910,7 +923,7 @@ if(note_check[c].transverses==note_check[note_candidate[0]].transverses) {
 	}		
 
 // If there's one clear winner, we're done.  Write that to the shared memory
-// and go back.
+// and go back.  This appears to be the case the great majority of the time.
 	if(note_candidate_count==1) {
 		front_info->tones[0]=note_candidate[0];
 		front_info->tones[1]=-1;
@@ -918,7 +931,7 @@ if(note_check[c].transverses==note_check[note_candidate[0]].transverses) {
 		return;
 	}
 
-// From here, the code only executes if the foregoing did not fine one, single
+// From here, the code only executes if the foregoing did not find one, single
 // clear winner.  An attempt to resolve a tie amongst winners of the transverse
 // elements contest now takes place.
 	
@@ -928,7 +941,8 @@ int most_roots;
 // tone_index is "number of notes that will be written to shared memory for the
 // synth"
 	
-	tone_index=0;
+	tone_index=0; // why is this initialized here when it's that's done
+			// in the for loop below?
 
 // We start from the assumption that there will be one clear winner and prepare
 // accordingly.  tones[0] need not be initialized because it WILL be assigned.	
