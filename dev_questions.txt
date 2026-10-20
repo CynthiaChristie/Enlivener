@@ -59,10 +59,18 @@ Fix the crashy keyboard volume controls.  Deal with the fact that a whole new vo
 
 SYNTH----------------------------
 
+--
 The synth did not have the scrutiny the front did prerelease, but here'd be a good thing to do: break out play_something() and all it's subfunctions into another .c file.  But break the whole key calculation out of play_something() and keep it in the main synth source, such that the new source file can do the whole part about building a half bar for output and get all it's info from extern objects.  That source file should have an init function so the person can do a midi connection or open a file or whatever, and then a play_something() that actually builds all the shit.
 
 It could be made too that the front could make multiple children and share the synth mem with them too, and then you could have a visualizer too or whatever the fuck you want, because it'll be a separate process and not drag the synth.
 
 I'm probably not doing all that shit though.
+--
+
+The bool array have_this in do_icing() appears to do utterly fuck all.  In fact it seems to be initialized to false, carefully set, and then initialized to false again and never hence referred to, so that's not fucking embarrassing at all.
+
+Do we give a shit that icing whole notes have the very tail cut off because of the Haas Effect offset causing it to be past the icing_overplay endpoint and thus not be copied?  I don't hear clicks so I don't really think so.
+
+
 
 

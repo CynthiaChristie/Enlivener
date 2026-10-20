@@ -219,7 +219,7 @@ int	octave;			// Tone selection offset that is always
 				// tone value
 
 int	r_offset;		// Offsets for stereo "airy" effect.
-int	l_offset;
+int	l_offset;		// The "Haas Effect" I've learned it's called.
 
 
 bool	have_this[12];
@@ -736,6 +736,8 @@ int	oldest_index;
 }
 
 // I knew why this months ago when I wrote it but I don't now.  (Oct 2026)
+//
+// Now I do.  It's because icing whole notes will abruptly end.
 void mute_previous(buf)
 short *buf;
 {
