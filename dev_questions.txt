@@ -1,58 +1,18 @@
-DEBUG
-
-The left/right error in humanize_vol() - Later note: this was a Gemini catch that I'm not sure of.  It'll take a real archeological dig and I don't even hear it, so it's kind of like the problem that isn't a problem isn't a fuckin problem.
-
-
 
 
 
 FRONT
 --
-Kind of an I dunno one: The assumption that get_cycle() will find up to three tones to report to the synth.  There is a coded literal number of 3 all over the place for this, and it's for the historical reason that I noticed a note came with fourths and fifths a lot of the time, before I understood about transverse waves.  So I'd pick a fundamental according to the half-worked out logic I had at the time and then include a fourth or a fifth if it found it.  
-
-This is almost getting complicated enough to put it in fuckin markdown.  Anyway, the foregoing doesn't really make sense now that I do know about transverse waves and actually use the way that works to get the note in the first place.  
-
-So it would seem to make sense to go and change the 3 to a symbolic constant everywhere and frickety fuck with all the places where it says tones [1] or [2], but the thing is in practice that three is a pretty good choice if I'm going to have a neanderthal fucking thing like a literal number.  Watching it while I play seems to be that it almost always unambiguously picks one note, and very occasionally two.  There might be the odd fuckin case where the odds of it having like six different equally notes if we consider like 600 fuckin hours of playing time, but even then it'll a a one time thing for a half bar, and what the current thing will do will just ignore three of them.  I don't know if I care about that. 
-
-Ancient wisdom, many word, few point.
---
-
-
-
-Is PHASE_PERCENT supposed to be 100?  Really?  Well it works.  Can PHASE_PERCENT
-be legacied?  That means the "most_roots" fallback picker is cooked, doesn't it?
-
-Later note: No it doesn't, because the phase_index is recalculated before that so that anything that didn't provide a cancellation benefit is out, so the most_roots calculation will be fine.
-
-
-
-check the logic of the tone_index<3 loop at the end of get_cycle and see if the entire thing can be simplified.  Later note: Kinda no real point, it gets there like every 400 years or something.  Not like literally 400 years, I dunno, like once a minute or something, but nothing to really care about.  
-
-
-
-
-
-Change any objects called "index" to something that isn't a macro.  Later note: I think I got all those. (Done diddy done done.)
-
 
 Recheck argv interpreter, it looks fucked in view of arg_limit.  Consider total rewrite. (update: arg_limit is correct but user can still do stupid shit)
+
+Add a vol control for tinkly sounds.
 
 create bool flags for all argv[] conditions so the repeat loophole is closed.
 
 Check if we need synth_ready anywhere but that one place.
 
 
-
-Can the "synth start" signal be sooner?  There's a one time latency penalty at startup that's not repeated when it wakes up from a silence-induced idle.  I bet that's why.  -- Later note: moved it to just before the banner, but not sure it's helping the hiccup thing.  Not sure it isn't either.
-
-
-
-
-And while you're at it just fuckin get rid of this shit, the keyboard and the timer.  Don't forget the planned exit, just fuckin get rid of all that shit.
-
-Consider removing the whole "timer" business, since it frequently resets.
-
-Fix the crashy keyboard volume controls.  Deal with the fact that a whole new voice has been introduced since that was written.
 
 SYNTH----------------------------
 
@@ -62,10 +22,31 @@ The synth did not have the scrutiny the front did prerelease, but here'd be a go
 It could be made too that the front could make multiple children and share the synth mem with them too, and then you could have a visualizer too or whatever the fuck you want, because it'll be a separate process and not drag the synth.
 
 I'm probably not doing all that shit though.
+
+But if I were:
+
+	play_something()
+	Break out the advance sample logic as a separate thing.  
+	Break out the note_history
+	Break out the note selectors
+	Break out the drum mixer just because ungainly as is
+	
+	init()
+	I have no tasks for it but just some fucking thing.
+	
+	Other people could have a gui hook, a midi thing, a file to sequence,
+	a visualizer, fuckin pyros if it hears a triad, fuckin whatever
 --
 
-Do we give a shit that icing whole notes have the very tail cut off because of the Haas Effect offset causing it to be past the icing_overplay endpoint and thus not be copied?  I don't hear clicks so I don't really think so. --  Later note: Yes, we do. Expanded icing_overplay to account for this.
 
 
 
+-- NOT ADDRESSED BUT PROBABLY NOT IMPORTANT
+That channel thing Gemini was on about.  I think I actually fixed it that night.
+
+The hardcoded 3 tones[] all over the place.
+
+PHASE_PERCENT is 100
+
+Logic of most_roots pass in get_cycle() might be amenable to reduction
 

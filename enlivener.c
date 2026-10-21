@@ -216,14 +216,14 @@ bool		first_run;
 // to play one of my demos at her weekly dance event.  The timer worked then
 // but a lot else about it was messed up.  It's a good tradeoff but since
 // the release was rushed, there's a broken timer.
-
+/*
 long		start_time;
 long		elapsed;
 
 long		end_minutes;
 long		end_seconds;
 long		actual_end;
-
+*/
 // shared memory file descriptor
 int		shm_fd;
 
@@ -334,11 +334,12 @@ struct sigaction sa;
 	found_bass_vol=false;
 	arg_limit=5;
 	a_bpm=-1;
-	actual_end=-1;
+//	actual_end=-1;
 				
 // A loop to try to parse the command line arguments in a not too rigid way.
 	if(argc>1) for(c=1;c<argc;c++) {
 		printf("%s...let's see what that is: ",argv[c]);
+/*
 		d=sscanf(argv[c],"%ld:%2ld",&end_minutes,&end_seconds);
 		if(d==2) {
 			printf("It's an end marker.\n");
@@ -346,6 +347,7 @@ struct sigaction sa;
 			if(c<arg_limit) continue;
 			else break;
 		}
+*/
 		// d=atoi(argv[c]);
 		for(d=0;d<strlen(argv[c]);d++) if(!isdigit(argv[c][d])) break;
 		
@@ -557,9 +559,9 @@ printf("under Creative Commons Attribution-NonCommercial 4.0 International Publi
 putchar('\n');
 printf("%d bpm\n\n",bpm);
 
-clock_gettime(CLOCK_MONOTONIC,&tp);
+//clock_gettime(CLOCK_MONOTONIC,&tp);
 
-start_time=NANONANO;
+//start_time=NANONANO;
 
 //////////////////////
 for(;;) {
@@ -605,24 +607,24 @@ for(;;) {
 
 
 	// If an end was marked, check if we've reached it
-	elapsed=(NANONANO-start_time)/1000000000;
+/*	elapsed=(NANONANO-start_time)/1000000000;
 	
 	if(actual_end!=-1) if(elapsed>actual_end) {
 		front_info->reached_end=true;
 		printf("\n\nReached end marker!\n\n");
 		actual_end=-1;
 	}
-	
+*/	
 	// See if get_cycle() reported silence or if we are either initializing
 	// or coming back from quiet.
 	
 	if(tones[0]==-1) {
 		if(first_run) {
 			// If first or in quiet mode
-			start_time=NANONANO;
+//			start_time=NANONANO;
 			sprintf(playcmd,"Ok, start playing.");
-		} else sprintf(playcmd,"%ld:%02ld - I don't hear anything",
-			elapsed/60,elapsed%60);
+		} else sprintf(playcmd,"I don't hear anything");
+			// elapsed/60,elapsed%60);
 			
 		
 	} else {
@@ -630,13 +632,13 @@ for(;;) {
 
 	
 	// Start the display timer
-	if(first_run)start_time=NANONANO;
+//	if(first_run)start_time=NANONANO;
 	
 	// Set to true again if we enter quiet mode.
 	first_run=false;
 
 	// Start status line with timer
-	sprintf(playcmd,"%ld:%02ld - ",elapsed/60,elapsed%60);
+//	sprintf(playcmd,"%ld:%02ld - ",elapsed/60,elapsed%60);
 	
 	// Print the volumes
 	sprintf(&(playcmd[strlen(playcmd)]),"b%3d d%3d",
@@ -707,7 +709,7 @@ for(;;) {
 	if(dead_buffers==MAX_NO_SOUND) {
 		dead_buffers=0;
 		first_run=true;
-		start_time=NANONANO;
+//		start_time=NANONANO;
 	} 
 	
 	

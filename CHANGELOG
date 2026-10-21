@@ -37,3 +37,13 @@ Oct 21
 	
 -- push was here
 
+Oct 21 cont'd
+
+Commented out all that shit to do with timers and live keyboard input, as well as objects dedicated to that.
+
+Broke the long forgotten latency adjuster out of play_something(), called it latency_check() and put the trigger and reset in the main loop, as the first step of modularizing the synth.
+
+Created function collect_presynth_info() and moved all the stuff to do with finding
+the key or legal notes or what the tracker said and all that stuff in there.
+
+Added note about slow tempos 60-89 being broken in the README.  Could be a while before I get to that.

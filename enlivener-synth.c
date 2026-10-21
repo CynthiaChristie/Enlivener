@@ -181,7 +181,7 @@ short		*beatbuf;
 short		*mixbuf;
 int		prev_tones[3];
 
-
+long		advance_samples;
 
 // function declarations
 void		set_icing();
@@ -197,7 +197,8 @@ unsigned char	sort_note_entry();
 void		find_key();
 void		best_key_match();
 void		do_icing();
-
+void		latency_skip();
+void		collect_presynth_info();
 
 // This function produces all the piano-y tinkling sounds
 void do_icing(buf,ps_tones)
@@ -1265,60 +1266,21 @@ mixbuf=malloc((AUDIO_READ*2)*sizeof(short)*(stereo?2:1));
 	close(dat_fd);
 }
 
-// Invoked by main() in the ongoing execution loop to write a half bar
-// and output it to the audio device
-void play_something(tones)
-int	*tones;
+//
+// If known to be behind, skip that number of samples for compositon,
+// moving the drum track along.  I'm breaking this out on Oct 21 2026,
+// having not seen it execute for months because it never has fallen
+// behind since many versions ago.  I have not stress tested the breakout.
+//
+// Breaking out from the original "play_something" I mean
+
+void latency_skip(tones)
+int *tones;
 {
-struct timespec	tp;
-int		pa_says,pa_err;
-short		*playbuf;
-int		sample_int;
-
+int	c;
+struct timespec tp;
 int adv_beat_index;
-
-int c,d;
-
-
-long	advance_samples;
-
-short	*human_time;
-
-int	use_tone;
-
-int	fade_level_start;
-int	fade_level_end;
-
-int	actual_level;
-
-bool	found_min_third;
-bool	found_maj_third;
-bool	found_fifth;
-
-bool	used_fifth;
-bool	used_third;
-
-
-	clock_gettime(CLOCK_MONOTONIC,&tp);
-				
-	srand(time(&(tp.tv_nsec)));
-		
-	if(front_info->reached_end) {
-		quiet_count++;
-		if(quiet_count==QUIET_ITER) {
-			kill(basspid,SIGUSR1);
-			exit(EXIT_SUCCESS);
-		}
-	}	
-	
-	
-	// This used to be needed to try and sync up a previous, network
-	// packet synchronous version of the app.  It might still sometimes
-	// execute under heavy load.  Since I care about the music and
-	// not the execution details I didn't test the latter after the 
-	// former was good.
-	if((last_play!=-1)&&have_drums) {
-
+int pa_err;
 				
 		clock_gettime(CLOCK_MONOTONIC,&tp);
 		
@@ -1347,11 +1309,24 @@ if(tones[0]!=-1) {
 		advance_samples*2*sizeof(short),&pa_err);
 		
 		advance_samples=advance_samples%(SINE_QUARTER*2);
-		
-	} else advance_samples=0;
 	
+}
 
-	bzero(audio,(AUDIO_READ+HUMANIZE_TIME)*4*sizeof(short));
+void collect_presynth_info(tones)
+int *tones;
+{
+int c,d;
+
+
+// Start mitosis
+
+
+bool	found_min_third;
+bool	found_maj_third;
+bool	found_fifth;
+
+bool	used_fifth;
+bool	used_third;
 
 	note_history_index=front_info->note_history_index;
 	memcpy(note_history,front_info->note_history,NOTE_HISTORY_LIMIT*
@@ -1359,31 +1334,6 @@ if(tones[0]!=-1) {
 	
 	find_key();
 
-
-// this if means, if we're in regular play or mid fade out, 
-// rather than in a silent period
-if(
-
-(tones[0]!=-1)||
-(
-(((quiet_count>0)&&(quiet_count<QUIET_ITER))&&(prev_tones[0]!=-1))
-)) {
-
-
-	if(quiet)beat_index=0;
-	quiet=false;
-	if(tones[0]!=-1) {
-		if(!(front_info->reached_end))quiet_count=0;
-		memcpy(prev_tones,tones,3*sizeof(int));
-	} else {
-		tones=prev_tones;
-		if((quiet_count<QUIET_ITER)&&(!(front_info->reached_end)))
-		quiet_count++;
-		
-		
-		if((quiet_count==QUIET_ITER)&&(!(front_info->reached_end)))
-		quiet=true;
-	}
 
 //
 // Collect all the available notes that are good for us to use 
@@ -1496,6 +1446,78 @@ key_info->triad=(used_third&&used_fifth);
 	
 	memcpy(key_info->tones,tones,3*sizeof(int));
 	
+// end mitosis
+
+
+}
+
+// Invoked by main() in the ongoing execution loop to write a half bar
+// and output it to the audio device
+void play_something(tones)
+int	*tones;
+{
+struct timespec	tp;
+int		pa_says,pa_err;
+short		*playbuf;
+int		sample_int;
+
+
+
+int c,d;
+
+
+
+
+short	*human_time;
+
+int	use_tone;
+
+int	fade_level_start;
+int	fade_level_end;
+
+int	actual_level;
+
+
+	clock_gettime(CLOCK_MONOTONIC,&tp);
+				
+	srand(time(&(tp.tv_nsec)));
+		
+	if(front_info->reached_end) {
+		quiet_count++;
+		if(quiet_count==QUIET_ITER) {
+			kill(basspid,SIGUSR1);
+			exit(EXIT_SUCCESS);
+		}
+	}	
+	
+
+	bzero(audio,(AUDIO_READ+HUMANIZE_TIME)*4*sizeof(short));
+	
+// this if means, if we're in regular play or mid fade out, 
+// rather than in a silent period
+if(
+
+(tones[0]!=-1)||
+(
+(((quiet_count>0)&&(quiet_count<QUIET_ITER))&&(prev_tones[0]!=-1))
+)) {
+
+
+	if(quiet)beat_index=0;
+	quiet=false;
+	if(tones[0]!=-1) {
+		if(!(front_info->reached_end))quiet_count=0;
+		memcpy(prev_tones,tones,3*sizeof(int));
+	} else {
+		tones=prev_tones;
+		if((quiet_count<QUIET_ITER)&&(!(front_info->reached_end)))
+		quiet_count++;
+		
+		
+		if((quiet_count==QUIET_ITER)&&(!(front_info->reached_end)))
+		quiet=true;
+	}
+
 //
 // Now a rand tree similar in princple to the do_icing() one
 
@@ -1700,13 +1722,13 @@ if(quiet_count>0) {
 
 			
 // write to audio device
+/*
+
 pa_simple_write(pa_index_out,quiet?audio:playbuf,
 ((SINE_QUARTER*2))*sizeof(short)
 *(stereo?2:1),&pa_err);
 
-	// Store the time for a the skip check at the start of this function
-	clock_gettime(CLOCK_MONOTONIC,&tp);
-	last_play=NANONANO;
+*/
 
 
 }
@@ -1781,7 +1803,7 @@ double			progress;
 	prev_tones[1]=-1;
 	prev_tones[2]=-1;
 
-
+	advance_samples=0;
 
 	bpm=front_info->bpm;
 		
@@ -1928,10 +1950,29 @@ for(;;) {
 	
 	clock_gettime(CLOCK_MONOTONIC,&tp);
 	main_last_play=NANONANO;
-	
+
 	memcpy(use_tones,front_info->tones,3*sizeof(int));
-	play_something(use_tones);
 	
+	// This used to be needed to try and sync up a previous, network
+	// packet synchronous version of the app.  It might still sometimes
+	// execute under heavy load.  Since I care about the music and
+	// not the execution details I didn't test the latter after the 
+	// former was good.
+	if((last_play!=-1)&&have_drums) latency_skip(use_tones);
+	else advance_samples=0;
+
+	collect_presynth_info(use_tones);
+			
+	play_something(use_tones);
+
+pa_simple_write(pa_index_out,quiet?audio:mixbuf,
+((SINE_QUARTER*2))*sizeof(short)
+*(stereo?2:1),&pa_err);
+
+	// Store the time for the latency check 
+	clock_gettime(CLOCK_MONOTONIC,&tp);
+	last_play=NANONANO;
+		
 	for(;;) {
 		clock_gettime(CLOCK_MONOTONIC,&tp);
 		if(NANONANO>(main_last_play+main_wait_time)) break;
