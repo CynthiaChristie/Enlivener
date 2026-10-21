@@ -6,15 +6,7 @@ The left/right error in humanize_vol() - Later note: this was a Gemini catch tha
 
 
 
-
-GENERAL------------------
-
-Explain why sample_int in the README or somewhere so it doesn't have to be
-commented in the code every time.
-
-FRONT---------------------
-
-
+FRONT
 --
 Kind of an I dunno one: The assumption that get_cycle() will find up to three tones to report to the synth.  There is a coded literal number of 3 all over the place for this, and it's for the historical reason that I noticed a note came with fourths and fifths a lot of the time, before I understood about transverse waves.  So I'd pick a fundamental according to the half-worked out logic I had at the time and then include a fourth or a fifth if it found it.  
 
@@ -32,13 +24,15 @@ be legacied?  That means the "most_roots" fallback picker is cooked, doesn't it?
 
 Later note: No it doesn't, because the phase_index is recalculated before that so that anything that didn't provide a cancellation benefit is out, so the most_roots calculation will be fine.
 
+
+
 check the logic of the tone_index<3 loop at the end of get_cycle and see if the entire thing can be simplified.  Later note: Kinda no real point, it gets there like every 400 years or something.  Not like literally 400 years, I dunno, like once a minute or something, but nothing to really care about.  
 
 
 
 
 
-Change any objects called "index" to something that isn't a macro.
+Change any objects called "index" to something that isn't a macro.  Later note: I think I got all those. (Done diddy done done.)
 
 
 Recheck argv interpreter, it looks fucked in view of arg_limit.  Consider total rewrite. (update: arg_limit is correct but user can still do stupid shit)
@@ -47,7 +41,12 @@ create bool flags for all argv[] conditions so the repeat loophole is closed.
 
 Check if we need synth_ready anywhere but that one place.
 
-Can the "synth start" signal be sooner?  There's a one time latency penalty at startup that's not repeated when it wakes up from a silence-induced idle.  I bet that's why.  -- Later note: moved it to just before the banner, but not sure it's helping the hiccup thing.
+
+
+Can the "synth start" signal be sooner?  There's a one time latency penalty at startup that's not repeated when it wakes up from a silence-induced idle.  I bet that's why.  -- Later note: moved it to just before the banner, but not sure it's helping the hiccup thing.  Not sure it isn't either.
+
+
+
 
 And while you're at it just fuckin get rid of this shit, the keyboard and the timer.  Don't forget the planned exit, just fuckin get rid of all that shit.
 

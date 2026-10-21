@@ -944,7 +944,7 @@ int most_roots;
 // tone_index is "number of notes that will be written to shared memory for the
 // synth"
 	
-	tone_index=0; // why is this initialized here when it's that's done
+//	tone_index=0; // why is this initialized here when it's that's done
 			// in the for loop below?
 
 // We start from the assumption that there will be one clear winner and prepare
@@ -1014,7 +1014,7 @@ double step;
 double angle;
 double my_sin;	// double nothing is still nothing :(
 
-int index;
+int sin_index;
 
 double d_sample;
 
@@ -1041,16 +1041,16 @@ bool first_cycle;
 	first_cycle=true;	// We have to set all the phase references
 				// in the first cycle
 			
-	for(index=0;index<(samples+(int)d_period)+1;index++) {
+	for(sin_index=0;sin_index<(samples+(int)d_period)+1;sin_index++) {
 		my_sin=sin(angle);
 		d_sample=my_sin*SINE_CHECK_LEVEL;
-		myfreq.sine_buf[index]=(short)d_sample;
+		myfreq.sine_buf[sin_index]=(short)d_sample;
 
 ////
 if(first_cycle) { // if first cycle, set the phases.
 
 // If we are at the point in the cycle to mark the next one...
-if((index>=phase_index*phase_size)&&(phase_index<MAX_PHASE)) {
+if((sin_index>=phase_index*phase_size)&&(phase_index<MAX_PHASE)) {
 
 	// Each one will need an entire structure, already embedded in
 	// the FREQ_FRONT type.
@@ -1058,8 +1058,8 @@ if((index>=phase_index*phase_size)&&(phase_index<MAX_PHASE)) {
 
 	// Mark the offset numerically and create a pointer to that place
 	// in the buffer as well.
-	myfreq.phase[phase_index].offset=index;
-	myfreq.phase[phase_index].sine_buf=&(myfreq.sine_buf[index]);
+	myfreq.phase[phase_index].offset=sin_index;
+	myfreq.phase[phase_index].sine_buf=&(myfreq.sine_buf[sin_index]);
 	
 	// record the period	
 	myfreq.phase[phase_index].period=myfreq.period;
@@ -1292,7 +1292,7 @@ double wanted;
 
 double collecter_l,collecter_r;
 
-int index;
+// int index;
 
 short *newbuf;
 

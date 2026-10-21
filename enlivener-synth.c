@@ -409,22 +409,39 @@ case 0:
 		l_offset=(rand()%ICING_OFFSET);
 		r_offset=(rand()%ICING_OFFSET);
 		for(c=0;c<SINE_QUARTER;c++) {
-		
-			sample_int=buf[(c+l_offset)*2];
+
+//
+			target_sample=((c+l_offset)<(SINE_QUARTER*2))
+			?&(buf[(c+l_offset)*2]):
+			&(icing_overplay[(c+l_offset)-(SINE_QUARTER*2)]);
+//			
+			
+			sample_int=*target_sample;			
+//			sample_int=buf[(c+l_offset)*2];
 			sample_int+=icing[this_ice+octave]->quarter[c];
 			
 			if(sample_int>32767) sample_int=32767;
 			if(sample_int<-32768) sample_int=-32768;
 			
-			buf[(c+l_offset)*2]=sample_int;
+
+			*target_sample=sample_int;			
+//			buf[(c+l_offset)*2]=sample_int;
+
+
+			target_sample=((c+r_offset)<(SINE_QUARTER*2))
+			?&(buf[((c+r_offset)*2)+1]):
+			&(icing_overplay[(c+r_offset)-(SINE_QUARTER*2)]);
 			
-			sample_int=buf[((c+r_offset)*2)+1];
+			
+			sample_int=*target_sample;						
+//			sample_int=buf[((c+r_offset)*2)+1];
 			sample_int+=icing[this_ice+octave]->quarter[c];
 			
 			if(sample_int>32767) sample_int=32767;
 			if(sample_int<-32768) sample_int=-32768;
-			
-			buf[((c+r_offset)*2)+1]=sample_int;
+
+			*target_sample=sample_int;			
+//			buf[((c+r_offset)*2)+1]=sample_int;
 
 		}
 		break;
@@ -433,42 +450,84 @@ case 1:		octave=(rand()%2)*12;
 		l_offset=(rand()%ICING_OFFSET);
 		r_offset=(rand()%ICING_OFFSET);
 		for(c=0;c<SINE_EIGHTH;c++) {
-			sample_int=buf[(c+l_offset)*2];
+
+//
+			target_sample=((c+l_offset)<(SINE_QUARTER*2))
+			?&(buf[(c+l_offset)*2]):
+			&(icing_overplay[(c+l_offset)-(SINE_QUARTER*2)]);
+//
+
+
+			sample_int=*target_sample;
+
+//			sample_int=buf[(c+l_offset)*2];
 			sample_int+=icing[this_ice+octave]->eighth[c];
 			
 			if(sample_int>32767) sample_int=32767;
 			if(sample_int<-32768) sample_int=-32768;
 			
-			buf[(c+l_offset)*2]=sample_int;
-			
-			sample_int=buf[((c+r_offset)*2)+1];
+			*target_sample=sample_int;
+
+//			buf[(c+l_offset)*2]=sample_int;
+
+
+			target_sample=((c+r_offset)<(SINE_QUARTER*2))
+			?&(buf[((c+r_offset)*2)+1]):
+			&(icing_overplay[(c+r_offset)-(SINE_QUARTER*2)]);
+
+
+			sample_int=*target_sample;
+						
+//			sample_int=buf[((c+r_offset)*2)+1];
 			sample_int+=icing[this_ice+octave]->eighth[c];
 			
 			if(sample_int>32767) sample_int=32767;
 			if(sample_int<-32768) sample_int=-32768;
 			
-			buf[((c+r_offset)*2)+1]=sample_int;
+			*target_sample=sample_int;
+
+//			buf[((c+r_offset)*2)+1]=sample_int;
 
 		}
 		octave=(rand()%2)*12;
 		l_offset=(rand()%ICING_OFFSET);
 		r_offset=(rand()%ICING_OFFSET);
 		for(c=0;c<SINE_EIGHTH;c++) {
-			sample_int=buf[(SINE_EIGHTH+c+l_offset)*2];
+
+
+//
+		target_sample=((c+SINE_EIGHTH+l_offset)<(SINE_QUARTER*2))
+		?&(buf[(c+SINE_EIGHTH+l_offset)*2]):
+		&(icing_overplay[(c+SINE_EIGHTH+l_offset)-(SINE_QUARTER*2)]);
+//
+
+			sample_int=*target_sample;
+
+//			sample_int=buf[(SINE_EIGHTH+c+l_offset)*2];
+			sample_int+=icing[this_ice+octave]->eighth[c];
+			
+			if(sample_int>32767) sample_int=32767;
+			if(sample_int<-32768) sample_int=-32768;
+
+			*target_sample=sample_int;			
+//			buf[(SINE_EIGHTH+c+l_offset)*2]=sample_int;
+			
+
+
+		target_sample=((c+SINE_EIGHTH+r_offset)<(SINE_QUARTER*2))
+		?&(buf[((c+SINE_EIGHTH+r_offset)*2)+1]):
+		&(icing_overplay[(c+SINE_EIGHTH+r_offset)-(SINE_QUARTER*2)]);
+
+			sample_int=*target_sample;
+						
+//			sample_int=buf[((SINE_EIGHTH+c+r_offset)*2)+1];
 			sample_int+=icing[this_ice+octave]->eighth[c];
 			
 			if(sample_int>32767) sample_int=32767;
 			if(sample_int<-32768) sample_int=-32768;
 			
-			buf[(SINE_EIGHTH+c+l_offset)*2]=sample_int;
-			
-			sample_int=buf[((SINE_EIGHTH+c+r_offset)*2)+1];
-			sample_int+=icing[this_ice+octave]->eighth[c];
-			
-			if(sample_int>32767) sample_int=32767;
-			if(sample_int<-32768) sample_int=-32768;
-			
-			buf[((SINE_EIGHTH+c+r_offset)*2)+1]=sample_int;
+			*target_sample=sample_int;
+//			buf[((SINE_EIGHTH+c+r_offset)*2)+1]=sample_int;
 
 		}
 		break;
@@ -478,21 +537,40 @@ case 2: 	octave=(rand()%2)*12;
 		r_offset=(rand()%ICING_OFFSET);
 
 		for(c=0;c<SINE_EIGHTH;c++) {
-			sample_int=buf[(c+l_offset)*2];
+		
+//
+			target_sample=((c+l_offset)<(SINE_QUARTER*2))
+			?&(buf[(c+l_offset)*2]):
+			&(icing_overplay[(c+l_offset)-(SINE_QUARTER*2)]);
+//			
+		
+			sample_int=*target_sample;
+
+//			sample_int=buf[(c+l_offset)*2];
+			sample_int+=icing[this_ice+octave]->eighth[c];
+			
+			if(sample_int>32767) sample_int=32767;
+			if(sample_int<-32768) sample_int=-32768;
+
+			*target_sample=sample_int;			
+//			buf[(c+l_offset)*2]=sample_int;
+
+			target_sample=((c+r_offset)<(SINE_QUARTER*2))
+			?&(buf[((c+r_offset)*2)+1]):
+			&(icing_overplay[(c+r_offset)-(SINE_QUARTER*2)]);
+
+
+			sample_int=*target_sample;
+						
+//			sample_int=buf[((c+r_offset)*2)+1];
 			sample_int+=icing[this_ice+octave]->eighth[c];
 			
 			if(sample_int>32767) sample_int=32767;
 			if(sample_int<-32768) sample_int=-32768;
 			
-			buf[(c+l_offset)*2]=sample_int;
-			
-			sample_int=buf[((c+r_offset)*2)+1];
-			sample_int+=icing[this_ice+octave]->eighth[c];
-			
-			if(sample_int>32767) sample_int=32767;
-			if(sample_int<-32768) sample_int=-32768;
-			
-			buf[((c+r_offset)*2)+1]=sample_int;
+			*target_sample=sample_int;
+
+//			buf[((c+r_offset)*2)+1]=sample_int;
 
 		}
 		break;
@@ -501,21 +579,43 @@ case 3:		octave=(rand()%2)*12;
 		l_offset=(rand()%ICING_OFFSET);
 		r_offset=(rand()%ICING_OFFSET);
 		for(c=0;c<SINE_EIGHTH;c++) {
-			sample_int=buf[(SINE_EIGHTH+c+l_offset)*2];
+		
+		
+//
+		target_sample=((c+SINE_EIGHTH+l_offset)<(SINE_QUARTER*2))
+		?&(buf[(c+SINE_EIGHTH+l_offset)*2]):
+		&(icing_overplay[(c+SINE_EIGHTH+l_offset)-(SINE_QUARTER*2)]);
+//
+		
+
+			sample_int=*target_sample;
+					
+//			sample_int=buf[(SINE_EIGHTH+c+l_offset)*2];
+			sample_int+=icing[this_ice+octave]->eighth[c];
+			
+			if(sample_int>32767) sample_int=32767;
+			if(sample_int<-32768) sample_int=-32768;
+
+			*target_sample=sample_int;
+						
+//			buf[(SINE_EIGHTH+c+l_offset)*2]=sample_int;
+			
+		target_sample=((c+SINE_EIGHTH+r_offset)<(SINE_QUARTER*2))
+		?&(buf[((c+SINE_EIGHTH+r_offset)*2)+1]):
+		&(icing_overplay[(c+SINE_EIGHTH+r_offset)-(SINE_QUARTER*2)]);
+
+			sample_int=*target_sample;
+
+
+//			sample_int=buf[((SINE_EIGHTH+c+r_offset)*2)+1];
 			sample_int+=icing[this_ice+octave]->eighth[c];
 			
 			if(sample_int>32767) sample_int=32767;
 			if(sample_int<-32768) sample_int=-32768;
 			
-			buf[(SINE_EIGHTH+c+l_offset)*2]=sample_int;
-			
-			sample_int=buf[((SINE_EIGHTH+c+r_offset)*2)+1];
-			sample_int+=icing[this_ice+octave]->eighth[c];
-			
-			if(sample_int>32767) sample_int=32767;
-			if(sample_int<-32768) sample_int=-32768;
-			
-			buf[((SINE_EIGHTH+c+r_offset)*2)+1]=sample_int;
+			*target_sample=sample_int;
+
+//			buf[((SINE_EIGHTH+c+r_offset)*2)+1]=sample_int;
 
 		}
 		break;
@@ -1858,7 +1958,7 @@ double	angle;
 double	my_sin;
 double	step;
 
-int	index;
+int	sin_index;
 
 double	fade_val;
 
@@ -1876,38 +1976,38 @@ double	d_sample;
 	
 	angle=0;
 	
-	for(index=0;index<SINE_QUARTER*4;index++) {
+	for(sin_index=0;sin_index<SINE_QUARTER*4;sin_index++) {
 		my_sin=cos(angle);
 		
 		d_sample=my_sin*ICING_LEVEL;
 	
-		fade_val=d_sample*((double)((SINE_QUARTER*4)-index));
+		fade_val=d_sample*((double)((SINE_QUARTER*4)-sin_index));
 		fade_val/=(double)(SINE_QUARTER*4);
 		
-		icing[tone]->whole[index]=(short)fade_val;
+		icing[tone]->whole[sin_index]=(short)fade_val;
 		
 		
-		if(index<SINE_QUARTER*2) {	
-			fade_val=d_sample*((double)((SINE_QUARTER*2)-index));
+		if(sin_index<SINE_QUARTER*2) {	
+			fade_val=d_sample*((double)((SINE_QUARTER*2)-sin_index));
 			fade_val/=(double)(SINE_QUARTER*2);
 		
-			icing[tone]->half[index]=(short)fade_val;
+			icing[tone]->half[sin_index]=(short)fade_val;
 		}
 		
-		if(index<SINE_QUARTER) {
+		if(sin_index<SINE_QUARTER) {
 		
-			fade_val=d_sample*((double)((SINE_QUARTER)-index));
+			fade_val=d_sample*((double)((SINE_QUARTER)-sin_index));
 			fade_val/=(double)(SINE_QUARTER);
 			
-			icing[tone]->quarter[index]=(short)fade_val;
+			icing[tone]->quarter[sin_index]=(short)fade_val;
 		}
 		
-		if(index<SINE_EIGHTH) {
+		if(sin_index<SINE_EIGHTH) {
 		
-			fade_val=d_sample*((double)((SINE_EIGHTH)-index));
+			fade_val=d_sample*((double)((SINE_EIGHTH)-sin_index));
 			fade_val/=(double)(SINE_EIGHTH);
 			
-			icing[tone]->eighth[index]=(short)fade_val;
+			icing[tone]->eighth[sin_index]=(short)fade_val;
 		}
 		angle+=step;
 		if(angle>2*M_PI)angle-=2*M_PI;
@@ -2066,7 +2166,7 @@ double	step2;
 double	step_step;
 double	angle;
 double	d_sample;
-int	index;
+int	sin_index;
 double	my_sin;	// double nothing is still nothing :(
 bool	is_bend;
 double	sustain;
@@ -2113,7 +2213,7 @@ if(is_bend) {
 	
 	angle=2*M_PI;
 		
-	for(index=0;index<(dur);index++) {
+	for(sin_index=0;sin_index<dur;sin_index++) {
 		my_sin=sin(angle);
 
 
@@ -2132,13 +2232,13 @@ if(type!=WAVE_FUNDAMENTAL) {
 	d_sample/=32767;
 }
 
-		sine_buf[index]=(short)d_sample;
+		sine_buf[sin_index]=(short)d_sample;
 		
-		if(index<SHARP_ATTACK) {
+		if(sin_index<SHARP_ATTACK) {
 			angle-=step;
 			if(angle<0)angle+=(2*M_PI);
 			step+=step_step;
-			if(index==(SHARP_ATTACK-1))
+			if(sin_index==(SHARP_ATTACK-1))
 				step_step=(step-step2)/
 				(double)(dur-SHARP_ATTACK);
 		} else {

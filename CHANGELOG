@@ -11,7 +11,7 @@ have_this[] found not to be useless as alleged in dev_questions.txt
 Widened Hass effect in do_icing() (ICING_OFFSET) and found click and did a general fix to address this:
 
 	expanded icing_overplay to allow for ICING_OFFSET
-	removed restrainer that formerly accounted for lack of about in case 4
+	removed restrainer that formerly accounted for lack of above in case 4
 	Fixed apparent truncation of whole notes to 3/4 notes.
 	Fixed copy error in overplay buffer
 	Zeroed overplay in copy loop.
@@ -24,4 +24,16 @@ Oct 20 Cont'd
 	Took out superfluous division operation at end of cancel check
 	
 	Moved the synth_proceed to just before the banner.  Not sure that fixed the intro hiccup.
+
+
+Oct 21
+
+	Changed all those index counter objects in the sine generators to sin_index
 	
+	Applied the ternary buffer switch in do_icing in all cases, having realized
+	that really wide Haas spacing can still send the tails off into neverland
+	and also having forgotten a case.  It sounds much better to me now
+	though of course that is subjective.
+	
+-- push was here
+
