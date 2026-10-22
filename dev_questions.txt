@@ -1,3 +1,7 @@
+DEBUG
+--
+
+Ok so obviously the big thing now is that tempos below 90 are broken.
 
 
 

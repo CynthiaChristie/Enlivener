@@ -233,6 +233,7 @@ int	this_ice;
 // int	second_tone;
 
 short	*target_sample;
+short	fuck_off;
 
 	ice_tones_index=0;
 
@@ -403,7 +404,7 @@ short	*target_sample;
 		}
 	} else {
 this_ice=ice_tones[rand()%ice_tones_index];
-switch(rand()%5) {
+switch(rand()%((bpm<90)?4:5)) {
 
 case 0:		
 		octave=(rand()%2)*12;
@@ -627,26 +628,26 @@ case 4:	 	octave=(rand()%2)*12;
 		icing_have_overplay=true;
 		
 		for(c=0;c<SINE_QUARTER*4;c++) {
-			if((c+l_offset)<SINE_QUARTER*2) {  // *
+			if((c+l_offset)<(SINE_QUARTER*2)) {  // *
 				sample_int=buf[(c+l_offset)*2]; // *
 				sample_int+=icing[this_ice+octave]->whole[c];
 				if(sample_int>32767) sample_int=32767;
 				if(sample_int<-32768) sample_int=-32768;
 				buf[(c+l_offset)*2]=sample_int; // *
 			} else {
-			//	if((c+l_offset)<SINE_QUARTER*4)
+				if((c+l_offset)<((SINE_QUARTER*4)+ICING_OFFSET))
 				icing_overplay[(c+l_offset-(SINE_QUARTER*2))*2]
 				=icing[this_ice+octave]->whole[c]; // *	
 			}	
 			
-			if((c+r_offset)<SINE_QUARTER*2) {
+			if((c+r_offset)<(SINE_QUARTER*2)) {
 				sample_int=buf[((c+r_offset)*2)+1]; // *
 				sample_int+=icing[this_ice+octave]->whole[c];
 				if(sample_int>32767) sample_int=32767;
 				if(sample_int<-32768) sample_int=-32768;
 				buf[((c+r_offset)*2)+1]=sample_int;
 			} else {
-			//	if((c+r_offset)<SINE_QUARTER*4)
+				if((c+l_offset)<((SINE_QUARTER*4)+ICING_OFFSET))
 				icing_overplay[(((c+r_offset)
 				-(SINE_QUARTER*2))*2)+1]
 				=icing[this_ice+octave]->whole[c];	
@@ -670,6 +671,7 @@ case 4:	 	octave=(rand()%2)*12;
 target_sample=((SINE_QUARTER+c+l_offset)<(SINE_QUARTER*2))?
 		&(buf[(SINE_QUARTER+c+l_offset)*2]):
 &(icing_overplay[stereoL((SINE_QUARTER+c+l_offset)-(SINE_QUARTER*2))]);
+
 
 		sample_int=*target_sample;
 
