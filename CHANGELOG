@@ -47,3 +47,11 @@ Created function collect_presynth_info() and moved all the stuff to do with find
 the key or legal notes or what the tracker said and all that stuff in there.
 
 Added note about slow tempos 60-89 being broken in the README.  Could be a while before I get to that.
+
+--push was here
+
+OOPS fix: Fixed the fact that I forgot to code for stereo for today's work
+with icing_overplay.  Tempos below 90 still broken.  
+
+
+

@@ -28,6 +28,8 @@
 
 #define	SYNTH_EXECUTABLE	"./enlivener-synth"
 
+#define	stereoL(x)	((x)*2)
+#define stereoR(x)	(((x)*2)+1)
 
 #define SUSTAIN_FUNDAMENTAL	(rate*8)
 #define SUSTAIN_OCTAVE		(rate*6)

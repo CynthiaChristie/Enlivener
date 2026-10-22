@@ -297,7 +297,7 @@ short	*target_sample;
 
 			target_sample=((c+l_offset)<(SINE_QUARTER*2))
 			?&(buf[(c+l_offset)*2]):
-			&(icing_overplay[(c+l_offset)-(SINE_QUARTER*2)]);
+		&(icing_overplay[stereoL((c+l_offset)-(SINE_QUARTER*2))]);
 			
 
 //			sample_int=buf[(c+l_offset)*2];
@@ -313,7 +313,7 @@ short	*target_sample;
 			
 			target_sample=((c+r_offset)<(SINE_QUARTER*2))
 			?&(buf[((c+r_offset)*2)+1]):
-			&(icing_overplay[(c+r_offset)-(SINE_QUARTER*2)]);
+	&(icing_overplay[stereoR((c+r_offset)-(SINE_QUARTER*2))]);
 						
 			sample_int=*target_sample;
 			
@@ -334,7 +334,7 @@ short	*target_sample;
 		
 			target_sample=((c+l_offset)<(SINE_QUARTER*2))
 			?&(buf[(c+l_offset)*2]):
-			&(icing_overplay[(c+l_offset)-(SINE_QUARTER*2)]);
+		&(icing_overplay[stereoL((c+l_offset)-(SINE_QUARTER*2))]);
 			
 
 //			sample_int=buf[(c+l_offset)*2];
@@ -350,7 +350,7 @@ short	*target_sample;
 			
 			target_sample=((c+r_offset)<(SINE_QUARTER*2))
 			?&(buf[((c+r_offset)*2)+1]):
-			&(icing_overplay[(c+r_offset)-(SINE_QUARTER*2)]);
+	&(icing_overplay[stereoR((c+r_offset)-(SINE_QUARTER*2))]);
 						
 			sample_int=*target_sample;
 			
@@ -372,7 +372,7 @@ short	*target_sample;
 		
 			target_sample=((c+l_offset)<(SINE_QUARTER*2))
 			?&(buf[(c+l_offset)*2]):
-			&(icing_overplay[(c+l_offset)-(SINE_QUARTER*2)]);
+		&(icing_overplay[stereoL((c+l_offset)-(SINE_QUARTER*2))]);
 			
 
 //			sample_int=buf[(c+l_offset)*2];
@@ -388,7 +388,7 @@ short	*target_sample;
 			
 			target_sample=((c+r_offset)<(SINE_QUARTER*2))
 			?&(buf[((c+r_offset)*2)+1]):
-			&(icing_overplay[(c+r_offset)-(SINE_QUARTER*2)]);
+	&(icing_overplay[stereoR((c+r_offset)-(SINE_QUARTER*2))]);
 						
 			sample_int=*target_sample;
 			
@@ -414,7 +414,7 @@ case 0:
 //
 			target_sample=((c+l_offset)<(SINE_QUARTER*2))
 			?&(buf[(c+l_offset)*2]):
-			&(icing_overplay[(c+l_offset)-(SINE_QUARTER*2)]);
+		&(icing_overplay[stereoL((c+l_offset)-(SINE_QUARTER*2))]);
 //			
 			
 			sample_int=*target_sample;			
@@ -431,7 +431,7 @@ case 0:
 
 			target_sample=((c+r_offset)<(SINE_QUARTER*2))
 			?&(buf[((c+r_offset)*2)+1]):
-			&(icing_overplay[(c+r_offset)-(SINE_QUARTER*2)]);
+	&(icing_overplay[stereoR((c+r_offset)-(SINE_QUARTER*2))]);
 			
 			
 			sample_int=*target_sample;						
@@ -455,7 +455,7 @@ case 1:		octave=(rand()%2)*12;
 //
 			target_sample=((c+l_offset)<(SINE_QUARTER*2))
 			?&(buf[(c+l_offset)*2]):
-			&(icing_overplay[(c+l_offset)-(SINE_QUARTER*2)]);
+		&(icing_overplay[stereoL((c+l_offset)-(SINE_QUARTER*2))]);
 //
 
 
@@ -474,7 +474,7 @@ case 1:		octave=(rand()%2)*12;
 
 			target_sample=((c+r_offset)<(SINE_QUARTER*2))
 			?&(buf[((c+r_offset)*2)+1]):
-			&(icing_overplay[(c+r_offset)-(SINE_QUARTER*2)]);
+	&(icing_overplay[stereoR((c+r_offset)-(SINE_QUARTER*2))]);
 
 
 			sample_int=*target_sample;
@@ -499,7 +499,7 @@ case 1:		octave=(rand()%2)*12;
 //
 		target_sample=((c+SINE_EIGHTH+l_offset)<(SINE_QUARTER*2))
 		?&(buf[(c+SINE_EIGHTH+l_offset)*2]):
-		&(icing_overplay[(c+SINE_EIGHTH+l_offset)-(SINE_QUARTER*2)]);
+&(icing_overplay[stereoL((c+SINE_EIGHTH+l_offset)-(SINE_QUARTER*2))]);
 //
 
 			sample_int=*target_sample;
@@ -517,7 +517,7 @@ case 1:		octave=(rand()%2)*12;
 
 		target_sample=((c+SINE_EIGHTH+r_offset)<(SINE_QUARTER*2))
 		?&(buf[((c+SINE_EIGHTH+r_offset)*2)+1]):
-		&(icing_overplay[(c+SINE_EIGHTH+r_offset)-(SINE_QUARTER*2)]);
+&(icing_overplay[stereoR((c+SINE_EIGHTH+r_offset)-(SINE_QUARTER*2))]);
 
 			sample_int=*target_sample;
 						
@@ -542,7 +542,7 @@ case 2: 	octave=(rand()%2)*12;
 //
 			target_sample=((c+l_offset)<(SINE_QUARTER*2))
 			?&(buf[(c+l_offset)*2]):
-			&(icing_overplay[(c+l_offset)-(SINE_QUARTER*2)]);
+		&(icing_overplay[stereoL((c+l_offset)-(SINE_QUARTER*2))]);
 //			
 		
 			sample_int=*target_sample;
@@ -558,7 +558,7 @@ case 2: 	octave=(rand()%2)*12;
 
 			target_sample=((c+r_offset)<(SINE_QUARTER*2))
 			?&(buf[((c+r_offset)*2)+1]):
-			&(icing_overplay[(c+r_offset)-(SINE_QUARTER*2)]);
+	&(icing_overplay[stereoR((c+r_offset)-(SINE_QUARTER*2))]);
 
 
 			sample_int=*target_sample;
@@ -585,7 +585,7 @@ case 3:		octave=(rand()%2)*12;
 //
 		target_sample=((c+SINE_EIGHTH+l_offset)<(SINE_QUARTER*2))
 		?&(buf[(c+SINE_EIGHTH+l_offset)*2]):
-		&(icing_overplay[(c+SINE_EIGHTH+l_offset)-(SINE_QUARTER*2)]);
+&(icing_overplay[stereoL((c+SINE_EIGHTH+l_offset)-(SINE_QUARTER*2))]);
 //
 		
 
@@ -603,7 +603,7 @@ case 3:		octave=(rand()%2)*12;
 			
 		target_sample=((c+SINE_EIGHTH+r_offset)<(SINE_QUARTER*2))
 		?&(buf[((c+SINE_EIGHTH+r_offset)*2)+1]):
-		&(icing_overplay[(c+SINE_EIGHTH+r_offset)-(SINE_QUARTER*2)]);
+&(icing_overplay[stereoR((c+SINE_EIGHTH+r_offset)-(SINE_QUARTER*2))]);
 
 			sample_int=*target_sample;
 
@@ -652,9 +652,10 @@ case 4:	 	octave=(rand()%2)*12;
 				=icing[this_ice+octave]->whole[c];	
 			}	
 		} 
-}
+		} // switch	
 	}
-//	for(;;) {
+
+
 		this_ice=ice_tones[rand()%ice_tones_index];
 //		if(c!=this_ice) {
 //			this_ice=c;
@@ -665,21 +666,37 @@ case 4:	 	octave=(rand()%2)*12;
 	l_offset=(rand()%ICING_OFFSET);
 	r_offset=(rand()%ICING_OFFSET);
 	for(c=0;c<SINE_EIGHTH;c++) {
-		sample_int=buf[(SINE_QUARTER+c+l_offset)*2];
+
+target_sample=((SINE_QUARTER+c+l_offset)<(SINE_QUARTER*2))?
+		&(buf[(SINE_QUARTER+c+l_offset)*2]):
+&(icing_overplay[stereoL((SINE_QUARTER+c+l_offset)-(SINE_QUARTER*2))]);
+
+		sample_int=*target_sample;
+
+//		sample_int=buf[(SINE_QUARTER+c+l_offset)*2];
 		sample_int+=icing[this_ice+octave]->eighth[c];
 			
 		if(sample_int>32767) sample_int=32767;
 		if(sample_int<-32768) sample_int=-32768;
 			
-		buf[(SINE_QUARTER+c+l_offset)*2]=sample_int;
+		*target_sample=sample_int;
+
+//		buf[(SINE_QUARTER+c+l_offset)*2]=sample_int;
 			
-		sample_int=buf[((SINE_QUARTER+c+r_offset)*2)+1];
+			
+target_sample=((SINE_QUARTER+c+r_offset)<(SINE_QUARTER*2))?
+		&(buf[((SINE_QUARTER+c+r_offset)*2)+1]):
+&(icing_overplay[stereoR((SINE_QUARTER+c+r_offset)-(SINE_QUARTER*2))]);
+
+		sample_int=*target_sample;
+//		sample_int=buf[((SINE_QUARTER+c+r_offset)*2)+1];
 		sample_int+=icing[this_ice+octave]->eighth[c];
 			
 		if(sample_int>32767) sample_int=32767;
 		if(sample_int<-32768) sample_int=-32768;
-			
-		buf[((SINE_QUARTER+c+r_offset)*2)+1]=sample_int;
+
+		*target_sample=sample_int;
+//		buf[((SINE_QUARTER+c+r_offset)*2)+1]=sample_int;
 
 	}
 //	for(;;) {
@@ -693,21 +710,39 @@ case 4:	 	octave=(rand()%2)*12;
 	l_offset=(rand()%ICING_OFFSET);
 	r_offset=(rand()%ICING_OFFSET);
 	for(c=0;c<SINE_EIGHTH;c++) {
-		sample_int=buf[(SINE_QUARTER+SINE_EIGHTH+c-l_offset)*2];
+	
+target_sample=((SINE_QUARTER+SINE_EIGHTH+c+l_offset)<(SINE_QUARTER*2))?
+		&(buf[(SINE_QUARTER+SINE_EIGHTH+c+l_offset)*2]):
+&(icing_overplay[stereoL((SINE_QUARTER+SINE_EIGHTH+c+l_offset)-(SINE_QUARTER*2))]);
+
+
+		sample_int=*target_sample;
+//		sample_int=buf[(SINE_QUARTER+SINE_EIGHTH+c-l_offset)*2];
 		sample_int+=icing[this_ice+octave]->eighth[c];
 			
 		if(sample_int>32767) sample_int=32767;
 		if(sample_int<-32768) sample_int=-32768;
 			
-		buf[(SINE_QUARTER+SINE_EIGHTH+c-l_offset)*2]=sample_int;
+		*target_sample=sample_int;
+		
+//		buf[(SINE_QUARTER+SINE_EIGHTH+c-l_offset)*2]=sample_int;
 			
-		sample_int=buf[((SINE_QUARTER+SINE_EIGHTH+c-r_offset)*2)+1];
+			
+target_sample=((SINE_QUARTER+SINE_EIGHTH+c+r_offset)<(SINE_QUARTER*2))?
+		&(buf[((SINE_QUARTER+SINE_EIGHTH+c+r_offset)*2)+1]):
+&(icing_overplay[stereoR((SINE_QUARTER+SINE_EIGHTH+c+r_offset)-(SINE_QUARTER*2))]);
+
+
+		sample_int=*target_sample;
+		
+//		sample_int=buf[((SINE_QUARTER+SINE_EIGHTH+c-r_offset)*2)+1];
 		sample_int+=icing[this_ice+octave]->eighth[c];
 			
 		if(sample_int>32767) sample_int=32767;
 		if(sample_int<-32768) sample_int=-32768;
-			
-		buf[((SINE_QUARTER+SINE_EIGHTH+c-r_offset)*2)+1]=sample_int;
+
+		*target_sample=sample_int;			
+//		buf[((SINE_QUARTER+SINE_EIGHTH+c-r_offset)*2)+1]=sample_int;
 
 	}
 }
