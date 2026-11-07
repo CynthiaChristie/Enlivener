@@ -51,6 +51,8 @@
 #define OLDEST_TONES	3000000000 
 
 
+#define AUDIO_TRACK	11025
+
 #define WINNER_CAP	((max_tone*MAX_PHASE)/50)
 
 #define PHASE_PERCENT	100

@@ -454,7 +454,7 @@ pa_index_in = pa_simple_new(NULL,               // Use the default server.
 // pointer to a static FREQ_FRONT object that it fills with information for
 // us, but that we have to copy out right away.
 //
-memcpy(freq[c],generate_sine_data(musical_tones[c],AUDIO_READ),sizeof(FREQ_FRONT));
+memcpy(freq[c],generate_sine_data(musical_tones[c],AUDIO_TRACK),sizeof(FREQ_FRONT));
 
 // Here, the phase array is not malloced as with freq, but rather populated
 // with pointers drawn from that array.
@@ -510,7 +510,7 @@ else synth_exe=SYNTH_EXECUTABLE;
 	printf("Using synth: %s\n",synth_exe);
 
 	// Get audio input buffer
-	audio=malloc(AUDIO_READ*sizeof(short));
+	audio=malloc(AUDIO_TRACK*sizeof(short));
 
 	if(synth_ready==false) while(!synth_ready);
 	// It could easily have finished initializing faster and already 
@@ -557,7 +557,7 @@ printf("Enlivener: Live guitar backing generator for Linux (Also my artist name)
 printf("(C) Cynthia Christie 2026\n");
 printf("under Creative Commons Attribution-NonCommercial 4.0 International Public License\n");
 putchar('\n');
-printf("%d bpm\n\n",bpm);
+//printf("%d bpm\n\n",bpm);
 
 //clock_gettime(CLOCK_MONOTONIC,&tp);
 
@@ -579,10 +579,10 @@ for(;;) {
 	// and get the buffer from the present moment.
 	
 	pa_simple_flush(pa_index_in,&pa_err);	        			
-	pa_simple_read(pa_index_in,audio,AUDIO_READ*sizeof(short),&pa_err);
+	pa_simple_read(pa_index_in,audio,AUDIO_TRACK*sizeof(short),&pa_err);
 
 	// Find out what note(s) are in it		
-	get_cycle(audio,AUDIO_READ);
+	get_cycle(audio,AUDIO_TRACK);
 
 
 // The following is all so the synth can figure out what else it's ok to play
@@ -641,8 +641,8 @@ for(;;) {
 //	sprintf(playcmd,"%ld:%02ld - ",elapsed/60,elapsed%60);
 	
 	// Print the volumes
-	sprintf(&(playcmd[strlen(playcmd)]),"b%3d d%3d",
-	front_info->bass_vol,front_info->drum_vol);
+//	sprintf(&(playcmd[strlen(playcmd)]),"b%3d d%3d",
+//	front_info->bass_vol,front_info->drum_vol);
 	
 	// Report what get_cycle() found
 	sprintf(&(playcmd[strlen(playcmd)])," - Heard: %s  (",
@@ -1736,9 +1736,7 @@ PHASE *ph2;
 //
 // At the end of the loop, down is compared to up and if down is greater,
 // the value of (down-up) is assigned to member "benefit" of the use_phase
-// structure.  Otherwise, benefit is set to zero.  Finally, the value
-// benefit is divided by the period of the test wave to remove unwarranted
-// biases in comparison due to differing lengths.
+// structure.  Otherwise, benefit is set to zero. 
 //
 // The value of use_phase->benefit is used by the parent function to sort
 // the array and begin to identify the tone, but there's more work for it
@@ -1762,8 +1760,7 @@ unsigned long up;
 unsigned long down;
 
 
-	// A one-cycle buffer of the test wave starting from the appropriate
-	// phase point
+	// Reference sine offset by specific phase
 	sine=use_phase->sine_buf;
 	
 	up=0;
@@ -1812,9 +1809,6 @@ if(	((avg>=0)&&(aud[c]>=0)) || ((avg<=0)&&(aud[c]<=0)) ) {
 	// overall penalty.
 	use_phase->benefit=(down>up)?(down-up):0;
 
-	// Adjust by wave period so lower notes are not inappropriately 
-	// weighted.
-//	use_phase->benefit/=len;
 }
 
 
