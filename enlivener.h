@@ -31,6 +31,20 @@
 #define	stereoL(x)	((x)*2)
 #define stereoR(x)	(((x)*2)+1)
 
+#define FILL_SQUARE	0
+#define FILL_TRIANGLE	1
+#define FILL_MAX	2
+
+#define FILL_LEVEL	8192
+
+#define FILL_PHASE_MAX	4
+
+#define FILL_RESET	16
+
+#define FILL_FLANGE_MAX	12
+
+#define FILL_FLANGE_ITER	32
+
 #define SUSTAIN_FUNDAMENTAL	(rate*8)
 #define SUSTAIN_OCTAVE		(rate*6)
 #define SUSTAIN_THIRD		(rate*2)
@@ -262,6 +276,12 @@ typedef struct {
 	NOTE_HISTORY	note_history[NOTE_HISTORY_LIMIT];
 } FRONT_INFO;
 
-
+typedef struct {
+	short	*samples[12];
+	int	position_l[12];
+	int	position_r[12];
+	int 	phase_cur_left;
+	int	phase_cur_right;
+} FILL;
 
 

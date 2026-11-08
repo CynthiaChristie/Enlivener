@@ -94,6 +94,7 @@ double	icing_tones[] = {
 0
 };
 
+FILL	fill[FILL_MAX];
 
 // The table below is where I worked out what the "key_mask" array of shorts
 // would have to look like.  You can see where the binary number on the
@@ -162,7 +163,19 @@ int		quiet_count;
 short		*icing_overplay;
 bool		icing_have_overplay;
 
+int		bar_count;
+
 int		bpm;
+
+int		fill_period[12];
+int		fill_phase_base[12];
+
+bool		fill_set_prev[12];
+
+int		fill_flange_sl;
+int		fill_flange_sr;
+int		fill_flange_tl;
+int		fill_flange_tr;
 
 pa_simple	*pa_index_out; 
 pa_sample_spec	ss_out;
@@ -199,6 +212,298 @@ void		best_key_match();
 void		do_icing();
 void		latency_skip();
 void		collect_presynth_info();
+void		fill_init();
+void		begin_fill_note();
+void		continue_fill_note();
+void		end_fill_note();
+void		set_fill_phase();
+void		fill_sequence();
+void		set_fill_note();
+
+void fill_sequence(buf,top_tones)
+short	*buf;
+int	*top_tones;
+{
+int	c;
+bool	fill_set_current[12];
+
+	for(c=0;c<12;c++) fill_set_current[c]=false;
+
+	for(c=0;c<3;c++) {
+
+		if(top_tones[c]==-1)continue;
+		if(fill_set_current[top_tones[c]])continue;
+	
+		if(fill_set_prev[top_tones[c]]) 
+		continue_fill_note(top_tones[c],buf,0);
+		else begin_fill_note(top_tones[c],buf);
+
+		fill_set_current[top_tones[c]]=true;
+		fill_set_prev[top_tones[c]]=false;
+	}
+	
+	for(c=0;c<12;c++) {
+		if(fill_set_prev[c]) end_fill_note(c,buf);
+		fill_set_prev[c]=fill_set_current[c];
+	}
+}
+
+void set_fill_phase()
+{
+	fill[FILL_SQUARE].phase_cur_left=(rand()%FILL_PHASE_MAX);
+	fill[FILL_SQUARE].phase_cur_right=(rand()%FILL_PHASE_MAX);
+	
+	fill[FILL_TRIANGLE].phase_cur_left=(rand()%FILL_PHASE_MAX);
+	fill[FILL_TRIANGLE].phase_cur_right=(rand()%FILL_PHASE_MAX);
+	
+	fill_flange_sl=rand()%FILL_FLANGE_MAX;
+	fill_flange_sr=rand()%FILL_FLANGE_MAX;
+	fill_flange_tl=rand()%FILL_FLANGE_MAX;
+	fill_flange_tr=rand()%FILL_FLANGE_MAX;
+}
+
+void set_fill_note(note,buf,voice,len)
+int	note;
+short	*buf;
+int	voice;
+int	len;
+{
+int	c;
+
+int	value_l, value_r;
+
+	for(c=0;c<len;c++) {
+	
+		if((c%FILL_FLANGE_ITER)==0) {
+		
+		fill[FILL_SQUARE].position_l[note]+=fill_flange_sl;
+		fill[FILL_SQUARE].position_r[note]+=fill_flange_sr;
+		fill[FILL_TRIANGLE].position_l[note]+=fill_flange_tl;
+		fill[FILL_TRIANGLE].position_r[note]+=fill_flange_tr;
+		
+		fill[FILL_SQUARE].position_l[note]%=fill_period[note];
+		fill[FILL_SQUARE].position_r[note]%=fill_period[note];
+		fill[FILL_TRIANGLE].position_l[note]%=fill_period[note];
+		fill[FILL_TRIANGLE].position_r[note]%=fill_period[note];
+		
+		}
+		value_l=fill[voice].samples[note]
+			[fill[voice].position_l[note]];
+		value_r=fill[voice].samples[note]
+			[fill[voice].position_r[note]];
+			
+		if(value_l>0)
+			value_l=value_l-((value_l*c)/len);
+		else
+			value_l=value_l+((value_l*c)/len);
+			
+		if(value_r>0)
+			value_r=value_r-((value_r*c)/len);
+		else
+			value_r=value_r+((value_r*c)/len);		
+
+			
+		value_l+=buf[stereoL(c)];
+		value_r+=buf[stereoR(c)];
+		
+		if(value_l>32767)value_l=32767;
+		if(value_l<-32768)value_l=-32768;
+		
+		if(value_r>32767)value_r=32767;
+		if(value_r<-32768)value_r=-32768;
+		
+		buf[stereoL(c)]=value_l;
+		buf[stereoR(c)]=value_r;
+		
+		fill[voice].position_l[note]=
+		(fill[voice].position_l[note]+1)%fill_period[note];
+		fill[voice].position_r[note]=
+		(fill[voice].position_r[note]+1)%fill_period[note];
+	}
+}
+void end_fill_note(note,buf)
+int	note;
+short	*buf;
+{
+int	c;
+
+int	value_l, value_r;
+	
+	for(c=0;c<SINE_EIGHTH;c++) {
+	
+		value_l=fill[FILL_SQUARE].samples[note]
+			[fill[FILL_SQUARE].position_l[note]];
+		value_l+=fill[FILL_TRIANGLE].samples[note]
+			[fill[FILL_TRIANGLE].position_l[note]];
+
+		value_r=fill[FILL_SQUARE].samples[note]
+			[fill[FILL_SQUARE].position_r[note]];
+		value_r+=fill[FILL_TRIANGLE].samples[note]
+			[fill[FILL_TRIANGLE].position_r[note]];
+			
+		value_l/=2;
+		value_r/=2;
+
+		if(value_l>0)
+			value_l=value_l-((value_l*c)/SINE_EIGHTH);
+		else
+			value_l=value_l+((value_l*c)/SINE_EIGHTH);
+			
+		if(value_r>0)
+			value_r=value_r-((value_r*c)/SINE_EIGHTH);
+		else
+			value_r=value_r+((value_r*c)/SINE_EIGHTH);
+			
+		value_l+=buf[stereoL(c)];
+		value_r+=buf[stereoR(c)];
+		
+		if(value_l>32767)value_l=32767;
+		if(value_l<-32768)value_l=-32768;
+		
+		if(value_r>32767)value_r=32767;
+		if(value_r<-32768)value_r=-32768;
+		
+		buf[stereoL(c)]=value_l;
+		buf[stereoR(c)]=value_r;
+		
+		fill[FILL_SQUARE].position_l[note]=
+		(fill[FILL_SQUARE].position_l[note]+1)%fill_period[note];
+		fill[FILL_SQUARE].position_r[note]=
+		(fill[FILL_SQUARE].position_r[note]+1)%fill_period[note];
+		
+		fill[FILL_TRIANGLE].position_l[note]=
+		(fill[FILL_TRIANGLE].position_l[note]+1)%fill_period[note];
+		fill[FILL_TRIANGLE].position_r[note]=
+		(fill[FILL_TRIANGLE].position_r[note]+1)%fill_period[note];
+	}	
+}
+
+void continue_fill_note(note,buf,offset)
+int	note;
+short	*buf;
+int	offset;
+{
+int	c;
+int	voice;
+int	remain;
+
+	remain=(SINE_QUARTER*2)-offset;
+	
+	for(voice=0;voice<FILL_MAX;voice++) for(c=offset;remain>0;) {
+
+	if((c==0)&&(rand()%2)) {
+		set_fill_note(note,buf,voice,SINE_QUARTER*2);
+		return;
+	}
+	
+	if((remain>=(3*SINE_EIGHTH))&&(rand()%2)) {
+		set_fill_note(note,&(buf[c]),voice,3*SINE_EIGHTH);
+		remain-=3*SINE_EIGHTH;
+		c+=3*SINE_EIGHTH;
+		continue;
+	}
+	
+	if((remain>=(2*SINE_EIGHTH))&&(rand()%2)) {
+		set_fill_note(note,&(buf[c]),voice,2*SINE_EIGHTH);
+		remain-=2*SINE_EIGHTH;
+		c+=2*SINE_EIGHTH;
+		continue;
+	}
+	
+	if((remain>=(3*SINE_SIXTEENTH))&&(rand()%2)) {
+		set_fill_note(note,&(buf[c]),voice,3*SINE_SIXTEENTH);
+		remain-=3*SINE_SIXTEENTH;
+		c+=3*SINE_SIXTEENTH;
+		continue;
+	}
+	
+	if((remain>=(1*SINE_EIGHTH))&&(rand()%2)) {
+		set_fill_note(note,&(buf[c]),voice,1*SINE_EIGHTH);
+		remain-=3*SINE_EIGHTH;
+		c+=1*SINE_EIGHTH;
+		continue;
+	}
+	
+	if((remain>=(1*SINE_SIXTEENTH))&&(rand()%2)) {
+		set_fill_note(note,&(buf[c]),voice,1*SINE_SIXTEENTH);
+		remain-=1*SINE_SIXTEENTH;
+		c+=1*SINE_SIXTEENTH;
+		continue;
+	}
+	}
+}
+void begin_fill_note(note,buf)
+int	note;
+short	*buf;
+{
+int	off_l_s, off_l_t, off_r_s, off_r_t;
+int	c;
+
+int value_l, value_r;
+
+	fill[FILL_SQUARE].position_l[note]=fill[FILL_SQUARE].phase_cur_left*
+		fill_phase_base[note];
+	fill[FILL_SQUARE].position_r[note]=fill[FILL_SQUARE].phase_cur_right*
+		fill_phase_base[note];
+		
+		
+	fill[FILL_TRIANGLE].position_l[note]=fill[FILL_TRIANGLE].phase_cur_left*
+		fill_phase_base[note];
+	fill[FILL_TRIANGLE].position_r[note]=fill[FILL_TRIANGLE].phase_cur_right*
+		fill_phase_base[note];
+	
+	fill[FILL_SQUARE].position_l[note]%=fill_period[note];
+	fill[FILL_TRIANGLE].position_l[note]%=fill_period[note];
+		
+	fill[FILL_SQUARE].position_r[note]%=fill_period[note];
+	fill[FILL_TRIANGLE].position_r[note]%=fill_period[note];
+	
+	for(c=0;c<SINE_EIGHTH;c++) {
+	
+		value_l=fill[FILL_SQUARE].samples[note]
+			[fill[FILL_SQUARE].position_l[note]];
+		value_l+=fill[FILL_TRIANGLE].samples[note]
+			[fill[FILL_TRIANGLE].position_l[note]];
+
+		value_r=fill[FILL_SQUARE].samples[note]
+			[fill[FILL_SQUARE].position_r[note]];
+		value_r+=fill[FILL_TRIANGLE].samples[note]
+			[fill[FILL_TRIANGLE].position_r[note]];
+			
+		value_l/=2;
+		value_r/=2;
+		
+//		if(c<SINE_EIGHTH) {
+			value_l=(value_l*c)/SINE_EIGHTH;
+			value_r=(value_r*c)/SINE_EIGHTH;
+//		}
+		
+		value_l+=buf[stereoL(c)];
+		value_r+=buf[stereoR(c)];
+		
+		if(value_l>32767)value_l=32767;
+		if(value_l<-32768)value_l=-32768;
+		
+		if(value_r>32767)value_r=32767;
+		if(value_r<-32768)value_r=-32768;
+		
+		buf[stereoL(c)]=value_l;
+		buf[stereoR(c)]=value_r;
+		
+		fill[FILL_SQUARE].position_l[note]=
+		(fill[FILL_SQUARE].position_l[note]+1)%fill_period[note];
+		fill[FILL_SQUARE].position_r[note]=
+		(fill[FILL_SQUARE].position_r[note]+1)%fill_period[note];
+		
+		fill[FILL_TRIANGLE].position_l[note]=
+		(fill[FILL_TRIANGLE].position_l[note]+1)%fill_period[note];
+		fill[FILL_TRIANGLE].position_r[note]=
+		(fill[FILL_TRIANGLE].position_r[note]+1)%fill_period[note];
+	}	
+	continue_fill_note(note,buf,SINE_EIGHTH);
+	
+}
+
 
 // This function produces all the piano-y tinkling sounds
 void do_icing(buf,ps_tones)
@@ -405,7 +710,7 @@ short	fuck_off;
 	} else {
 this_ice=ice_tones[rand()%ice_tones_index];
 switch(rand()%((bpm<90)?4:5)) {
-
+//switch(rand()%5) {
 case 0:		
 		octave=(rand()%2)*12;
 		l_offset=(rand()%ICING_OFFSET);
@@ -621,7 +926,8 @@ case 3:		octave=(rand()%2)*12;
 
 		}
 		break;
-		
+
+
 case 4:	 	octave=(rand()%2)*12;
 		l_offset=(rand()%ICING_OFFSET);
 		r_offset=(rand()%ICING_OFFSET);
@@ -636,7 +942,7 @@ case 4:	 	octave=(rand()%2)*12;
 				buf[(c+l_offset)*2]=sample_int; // *
 			} else {
 				if((c+l_offset)<((SINE_QUARTER*4)+ICING_OFFSET))
-				icing_overplay[(c+l_offset-(SINE_QUARTER*2))*2]
+				icing_overplay[((c+l_offset)-(SINE_QUARTER*2))*2]
 				=icing[this_ice+octave]->whole[c]; // *	
 			}	
 			
@@ -647,7 +953,7 @@ case 4:	 	octave=(rand()%2)*12;
 				if(sample_int<-32768) sample_int=-32768;
 				buf[((c+r_offset)*2)+1]=sample_int;
 			} else {
-				if((c+l_offset)<((SINE_QUARTER*4)+ICING_OFFSET))
+				if((c+r_offset)<((SINE_QUARTER*4)+ICING_OFFSET))
 				icing_overplay[(((c+r_offset)
 				-(SINE_QUARTER*2))*2)+1]
 				=icing[this_ice+octave]->whole[c];	
@@ -1674,6 +1980,8 @@ if((rand()%3)>0) {		// bar overall type 1
 		
 	}
 }
+
+fill_sequence(audio,tones);
 do_icing(audio,tones);
 // mute_previous(&(audio[SINE_QUARTER*4]));
 			
@@ -1963,8 +2271,11 @@ pa_index_out = pa_simple_new(NULL,               // Use the default server.
 		beatbuf=mono_away;
 		stereo=true; 	
 	}
-	
-	
+
+	for(c=0;c<12;c++) fill_set_prev[c]=false;
+		
+	fill_init();
+		
 	
 	audio=malloc((AUDIO_READ+HUMANIZE_TIME)*4*sizeof(short));
 	
@@ -1977,6 +2288,8 @@ pa_index_out = pa_simple_new(NULL,               // Use the default server.
 
 main_wait_time=((SINE_QUARTER*2*1000000000)/rate)-MAIN_PROC_ALLOW;
 
+bar_count=0;
+
 for(;;) {
 	while(!(front_info->synth_proceed));
 	
@@ -1984,7 +2297,9 @@ for(;;) {
 		printf("synth: enlivener no longer active\n");
 		exit(EXIT_SUCCESS);
 	}
-	
+
+	if(bar_count==0) set_fill_phase();
+		
 	clock_gettime(CLOCK_MONOTONIC,&tp);
 	main_last_play=NANONANO;
 
@@ -2017,6 +2332,8 @@ pa_simple_write(pa_index_out,quiet?audio:mixbuf,
 		sched_yield();
 
 	}
+	++bar_count;
+	bar_count%=FILL_RESET;
 }
 }	
 
@@ -2520,4 +2837,59 @@ unsigned char result;
 	if(l_count>1)pivotSort(myList,l_count,mySwap);
 	if(h_count>1)pivotSort(&(myList[h_index]),h_count,mySwap);	
 }	
+
+void fill_init()
+{
+double	freq;
+
+double	generic;
+
+int	c,d;
+int	period;
+
+	for(c=0;c<12;c++) {
+		freq=musical_tones[c+12];
+
+		generic=((double)rate)/freq;
+		
+		period=(int)generic;
+		
+		fill[FILL_SQUARE].samples[c]=malloc(period*sizeof(short));
+		fill[FILL_TRIANGLE].samples[c]=malloc(period*sizeof(short));
+		
+		fill_period[c]=period;
+		
+		fill[FILL_SQUARE].position_l[c]=0;
+		fill[FILL_TRIANGLE].position_l[c]=0;
+
+		fill[FILL_SQUARE].position_r[c]=0;
+		fill[FILL_TRIANGLE].position_r[c]=0;
+		
+		fill_phase_base[c]=period;
+		
+		for(;;) {
+			if((fill_phase_base[c]/2)<8)break;
+			fill_phase_base[c]/=2;
+		}
+		
+		for(d=0;d<period;d++) {
+		
+			if(d<(period/2)) {
+				fill[FILL_SQUARE].samples[c][d]=FILL_LEVEL;
+
+fill[FILL_TRIANGLE].samples[c][d]=FILL_LEVEL/(FILL_LEVEL+1-d);
+
+
+			} else {
+
+
+				fill[FILL_SQUARE].samples[c][d]=FILL_LEVEL*-1;
+
+fill[FILL_TRIANGLE].samples[c][d]=(FILL_LEVEL*-1)+(d-(FILL_LEVEL/2));
+
+			}
+		}		
+	}
+
+}
 
