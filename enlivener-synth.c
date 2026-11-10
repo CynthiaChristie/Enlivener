@@ -94,7 +94,18 @@ double	icing_tones[] = {
 0
 };
 
+double mid_tones[] = {
+329.6276, 349.2282, 369.9944, 391.9954, 415.3047, 440.0000, 
+466.1638, 493.8833, 523.2511, 554.3653, 587.3295, 622.2540 };
+
+
+//164.8138, 174.6141, 184.9972, 195.9977, 207.6523, 220.0000, 
+//233.0819, 246.9417, 261.6256, 277.1826, 293.6648, 311.1270 };
+
 FILL	fill[FILL_MAX];
+
+MID	mid[12];
+
 
 // The table below is where I worked out what the "key_mask" array of shorts
 // would have to look like.  You can see where the binary number on the
@@ -177,6 +188,14 @@ int		fill_flange_sr;
 int		fill_flange_tl;
 int		fill_flange_tr;
 
+int		mid_boost_square;
+int		mid_boost_cosine;
+int		mid_boost_sawtooth;
+
+bool		mid_set_square;
+bool		mid_set_cosine;
+bool		mid_set_sawtooth;
+
 pa_simple	*pa_index_out; 
 pa_sample_spec	ss_out;
 
@@ -219,6 +238,9 @@ void		end_fill_note();
 void		set_fill_phase();
 void		fill_sequence();
 void		set_fill_note();
+void		mid_init();
+void		mid_set();
+void		mid_set_note();
 
 void fill_sequence(buf,top_tones)
 short	*buf;
@@ -404,6 +426,7 @@ int	remain;
 	}
 	
 	if((remain>=(2*SINE_EIGHTH))&&(rand()%2)) {
+		if(rand()%2)
 		set_fill_note(note,&(buf[c]),voice,2*SINE_EIGHTH);
 		remain-=2*SINE_EIGHTH;
 		c+=2*SINE_EIGHTH;
@@ -411,6 +434,7 @@ int	remain;
 	}
 	
 	if((remain>=(3*SINE_SIXTEENTH))&&(rand()%2)) {
+		if(rand()%2);
 		set_fill_note(note,&(buf[c]),voice,3*SINE_SIXTEENTH);
 		remain-=3*SINE_SIXTEENTH;
 		c+=3*SINE_SIXTEENTH;
@@ -418,6 +442,7 @@ int	remain;
 	}
 	
 	if((remain>=(1*SINE_EIGHTH))&&(rand()%2)) {
+		if(rand()%2)
 		set_fill_note(note,&(buf[c]),voice,1*SINE_EIGHTH);
 		remain-=3*SINE_EIGHTH;
 		c+=1*SINE_EIGHTH;
@@ -425,6 +450,7 @@ int	remain;
 	}
 	
 	if((remain>=(1*SINE_SIXTEENTH))&&(rand()%2)) {
+		if(rand()%2)
 		set_fill_note(note,&(buf[c]),voice,1*SINE_SIXTEENTH);
 		remain-=1*SINE_SIXTEENTH;
 		c+=1*SINE_SIXTEENTH;
@@ -1981,6 +2007,8 @@ if((rand()%3)>0) {		// bar overall type 1
 	}
 }
 
+if(tones[0]!=-1)mid_set(tones[0],audio);
+
 fill_sequence(audio,tones);
 do_icing(audio,tones);
 // mute_previous(&(audio[SINE_QUARTER*4]));
@@ -2143,7 +2171,15 @@ double			progress;
 	quiet=true;
 	quiet_count=0;
 	icing_have_overplay=false;
+
+	mid_boost_square=1;
+	mid_boost_cosine=0;
+	mid_boost_sawtooth=0;
 	
+	mid_set_square=true;
+	mid_set_cosine=false;
+	mid_set_sawtooth=false;
+		
 	prev_tones[0]=-1;
 	prev_tones[1]=-1;
 	prev_tones[2]=-1;
@@ -2276,6 +2312,7 @@ pa_index_out = pa_simple_new(NULL,               // Use the default server.
 		
 	fill_init();
 		
+	mid_init();
 	
 	audio=malloc((AUDIO_READ+HUMANIZE_TIME)*4*sizeof(short));
 	
@@ -2847,6 +2884,8 @@ double	generic;
 int	c,d;
 int	period;
 
+int	sample_int;
+
 	for(c=0;c<12;c++) {
 		freq=musical_tones[c+12];
 
@@ -2871,25 +2910,265 @@ int	period;
 			if((fill_phase_base[c]/2)<8)break;
 			fill_phase_base[c]/=2;
 		}
+
+
+
 		
-		for(d=0;d<period;d++) {
-		
-			if(d<(period/2)) {
-				fill[FILL_SQUARE].samples[c][d]=FILL_LEVEL;
+		for(d=0;d<period/2;d++) {
+			fill[FILL_SQUARE].samples[c][d]=FILL_LEVEL;
+			fill[FILL_SQUARE].samples[c][d+(period/2)]=-1*FILL_LEVEL;
 
-fill[FILL_TRIANGLE].samples[c][d]=FILL_LEVEL/(FILL_LEVEL+1-d);
+if(d<(period/4)) {
 
+fill[FILL_TRIANGLE].samples[c][d]=(FILL_LEVEL*d)/(period/4);
+fill[FILL_TRIANGLE].samples[c][((period/2)-d)-1]=fill[FILL_TRIANGLE].samples[c][d];
 
-			} else {
+fill[FILL_TRIANGLE].samples[c][d+(period/2)]=
+fill[FILL_TRIANGLE].samples[c][d]*-1;
+fill[FILL_TRIANGLE].samples[c][(period-d)-1]=fill[FILL_TRIANGLE].samples[c][d]*-1;
 
+}
 
-				fill[FILL_SQUARE].samples[c][d]=FILL_LEVEL*-1;
-
-fill[FILL_TRIANGLE].samples[c][d]=(FILL_LEVEL*-1)+(d-(FILL_LEVEL/2));
-
-			}
-		}		
+		}
 	}
 
+}
+
+void mid_init()
+{
+int	note;
+
+double	frequency;
+double	period;
+double	angle;
+
+double	my_sin;
+
+double	step;
+
+// double	fake_angle;
+
+int	c;
+
+bool	first_pass;
+
+int	sample_int;
+// int	saw_position;
+
+// int	half_period;
+
+int i_period;
+
+	for(note=0;note<12;note++) {
+		mid[note].square=malloc(SINE_EIGHTH*sizeof(short));
+		mid[note].cosine=malloc(SINE_EIGHTH*sizeof(short));
+		mid[note].sawtooth=malloc(SINE_EIGHTH*sizeof(short));
+
+		first_pass=true;
+		
+		frequency=mid_tones[note];
+		period=rate/frequency;
+
+		i_period=(int)period;
+		
+//		half_period=period/2;
+		
+		step=(2*M_PI)/period;
+		
+		angle=0;
+		
+		for(c=0;c<SINE_EIGHTH;c++) {
+		
+			my_sin=sin(angle);
+			
+//			mid[note].cosine[c]=(short)(MID_LEVEL*my_cos);
+			
+			if(my_sin>0) mid[note].square[c]=MID_LEVEL;
+			else if (my_sin<0) mid[note].square[c]=(MID_LEVEL*-1);
+			else mid[note].square[c]=0;
+
+			if(first_pass) {
+				sample_int=65535-((65535*c)/period);
+				if(sample_int>32767)sample_int=32767;
+				if(sample_int<-32768)sample_int=-32768;
+				mid[note].sawtooth[c]=sample_int;
+				
+if(c<(i_period/4)) {
+mid[note].cosine[c]=(MID_LEVEL*c)/(i_period/4);
+mid[note].cosine[((i_period/2)-c)-1]=mid[note].cosine[c];
+
+mid[note].cosine[c+(i_period/2)]=
+mid[note].cosine[c]*-1;
+mid[note].cosine[(i_period-c)-1]=mid[note].cosine[c]*-1;
+}
+			}
+/*			
+			fake_angle=angle;
+			
+			while(fake_angle>(0.5*M_PI)) fake_angle-=(0.5*M_PI);
+			
+			fake_angle/=2;
+			
+			my_cos=cos(fake_angle);
+			
+			mid[note].sawtooth[c]=(short)(MID_LEVEL*my_cos);
+*/
+
+					
+			angle+=step;
+			
+			if(angle>=(2*M_PI)) { 
+				angle-=(2*M_PI);
+				first_pass=false;
+
+
+int	d;
+
+for(d=0;d<((int)period);d++)
+if((c+1+d)<SINE_EIGHTH) {
+	mid[note].sawtooth[c+1+d]=mid[note].sawtooth[d];
+	mid[note].cosine[c+1+d]=mid[note].cosine[d];
+}
+			}										
+		}	
+		
+	}
+}
+
+void mid_set(note,buf)
+int	note;
+short	*buf;
+{
+int c;
+
+	for(c=0;c<4;c++) {
+		if((rand()%3)==0) mid_set_note(note,&(buf[c*SINE_EIGHTH]));
+	}	
+}
+
+void mid_set_note(note,buf)
+int	note;
+short	*buf;
+{
+int	c;
+int	sample_int;
+
+int	l_haas;
+int	r_haas;
+
+	l_haas=rand()%MID_HAAS;
+	r_haas=rand()%MID_HAAS;
+	
+	for(c=0;c<SINE_EIGHTH;c++) {
+
+		sample_int=mid[note].square[c];
+		
+		sample_int=((MID_BASE+mid_boost_square)*sample_int)/
+		MID_BOOST_MAX;
+		
+		sample_int+=buf[stereoL(c+l_haas)];
+		
+		if(sample_int>32767)sample_int=32767;
+		if(sample_int<-32768)sample_int=-32768;
+		
+		buf[stereoL(c+l_haas)]=sample_int;
+//
+		sample_int=mid[note].square[c];
+		
+		sample_int=((MID_BASE+mid_boost_square)*sample_int)/
+		MID_BOOST_MAX;
+		
+		sample_int+=buf[stereoR(c+r_haas)];
+		
+		if(sample_int>32767)sample_int=32767;
+		if(sample_int<-32768)sample_int=-32768;
+		
+		buf[stereoR(c+r_haas)]=sample_int;
+		
+/////////////////		
+		
+		
+		sample_int=mid[note].cosine[c];
+		
+		sample_int=((MID_BASE+mid_boost_cosine)*sample_int)/
+		MID_BOOST_MAX;
+		
+		sample_int+=buf[stereoL(c+l_haas)];
+		
+		if(sample_int>32767)sample_int=32767;
+		if(sample_int<-32768)sample_int=-32768;
+		
+		buf[stereoL(c+l_haas)]=sample_int;
+//
+		sample_int=mid[note].cosine[c];
+		
+		sample_int=((MID_BASE+mid_boost_cosine)*sample_int)/
+		MID_BOOST_MAX;
+		
+		sample_int+=buf[stereoR(c+r_haas)];
+		
+		if(sample_int>32767)sample_int=32767;
+		if(sample_int<-32768)sample_int=-32768;
+		
+		buf[stereoR(c+r_haas)]=sample_int;
+		
+/////////////////
+
+		
+		sample_int=mid[note].sawtooth[c];
+		
+		sample_int=((MID_BASE+mid_boost_sawtooth)*sample_int)/
+		MID_BOOST_MAX;
+		
+		sample_int+=buf[stereoL(c+l_haas)];
+		
+		if(sample_int>32767)sample_int=32767;
+		if(sample_int<-32768)sample_int=-32768;
+		
+		buf[stereoL(c+l_haas)]=sample_int;
+//
+		sample_int=mid[note].sawtooth[c];
+		
+		sample_int=((MID_BASE+mid_boost_sawtooth)*sample_int)/
+		MID_BOOST_MAX;
+		
+		sample_int+=buf[stereoR(c+r_haas)];
+		
+		if(sample_int>32767)sample_int=32767;
+		if(sample_int<-32768)sample_int=-32768;
+		
+		buf[stereoR(c+r_haas)]=sample_int;
+		
+/////////////////
+
+	
+	
+	if(mid_set_square) {
+		++mid_boost_square;
+		if(mid_boost_square==MID_BOOST_MAX) {
+			mid_boost_square=0;
+			mid_boost_cosine=1;
+			mid_set_square=false;
+			mid_set_cosine=true;
+		}
+	} else if(mid_set_cosine) {
+		++mid_boost_cosine;
+		if(mid_boost_cosine==MID_BOOST_MAX) {
+			mid_boost_cosine=0;
+			mid_boost_sawtooth=1;
+			mid_set_cosine=false;
+			mid_set_sawtooth=true;
+		}
+	} else if(mid_set_sawtooth) {
+		++mid_boost_sawtooth;
+		if(mid_boost_sawtooth==MID_BOOST_MAX) {
+			mid_boost_sawtooth=0;
+			mid_boost_square=1;
+			mid_set_sawtooth=false;
+			mid_set_square=true;
+		}
+	}
+
+	}
 }
 

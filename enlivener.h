@@ -35,7 +35,14 @@
 #define FILL_TRIANGLE	1
 #define FILL_MAX	2
 
-#define FILL_LEVEL	8192
+#define FILL_LEVEL	5120
+
+#define	MID_LEVEL	12288
+
+#define MID_HAAS	64
+
+#define MID_BASE	64
+#define MID_BOOST_MAX	128
 
 #define FILL_PHASE_MAX	4
 
@@ -284,4 +291,9 @@ typedef struct {
 	int	phase_cur_right;
 } FILL;
 
+typedef struct {
+	short *square;
+	short *cosine;
+	short *sawtooth;
+} MID;
 

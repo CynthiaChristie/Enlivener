@@ -123,7 +123,11 @@ int		tones[3];	// Tones recognized by get_cycle()
 
 FRONT_INFO	*front_info;	// Memory block for sharing with synth
 
-
+/*
+int	count_low;
+int	count_mid;
+int	count_high;
+*/
 // Labels for reporting in status line
 char *note[] = { "E", "F", "F#/Gb", "G", "G#/Ab", "A", "A#/Bb", "B", "C",
 		"C#/Db", "D", "D#/Eb" };
@@ -335,7 +339,11 @@ struct sigaction sa;
 	arg_limit=5;
 	a_bpm=-1;
 //	actual_end=-1;
-				
+/*
+	count_low=0;
+	count_mid=0;
+	count_high=0;
+*/					
 // A loop to try to parse the command line arguments in a not too rigid way.
 	if(argc>1) for(c=1;c<argc;c++) {
 		printf("%s...let's see what that is: ",argv[c]);
@@ -690,7 +698,10 @@ for(;;) {
 	// print a * if we've picked out a triad - a very rare thing
 	sprintf(&(playcmd[strlen(playcmd)])," - %s %c",
 	tone_set_str(key_info->tones),(key_info->triad)?'*':' ');
-	
+
+	// low/mid/high
+//	sprintf(&(playcmd[strlen(playcmd)])," - %02d/%02d/%02d",
+//	count_low,count_mid,count_high);
 	}
 	
 	// Truncate the output string to the column length
@@ -848,7 +859,21 @@ int	note_candidate_count;	// Which, not every note is.
 //
 // I fuckin hate this word, but this is set to be deprecated I think.
 	phase_index=(phase_index*PHASE_PERCENT)/100;
-		
+
+
+// Now count low/mid/high
+/*
+	count_low=0;
+	count_mid=0;
+	count_high=0;
+	
+	for(c=0;c<phase_index;c++) {
+		if(phase[c]->tone<12)++count_low;
+		else if(phase[c]->tone>23) ++count_high;
+		else ++count_mid;
+	}	
+	
+	*/
 // Clear any garbage from this array
 	bzero(note_check,12*sizeof(NOTE_CHECK));
 	
