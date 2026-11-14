@@ -40,9 +40,11 @@ But if I were:
 	
 	Other people could have a gui hook, a midi thing, a file to sequence,
 	a visualizer, fuckin pyros if it hears a triad, fuckin whatever
+
+Update Oct 22 - All the above broken out of play_something() except the drum bit
 --
 
-
+Find why case 4: (whole notes) broken at low tempos instead of just not doing it.
 
 
 -- NOT ADDRESSED BUT PROBABLY NOT IMPORTANT

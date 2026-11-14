@@ -53,6 +53,25 @@ Added note about slow tempos 60-89 being broken in the README.  Could be a while
 OOPS fix: Fixed the fact that I forgot to code for stereo for today's work
 with icing_overplay.  Tempos below 90 still broken.  
 
+Oct 22
+
 Found those tempos broken for only whole notes (case 4:) in do_icing()
 Temp fix: Just don't do that at those tempos ("switch(rand()%((bpm<90)?4:5))")
+
+--push was here
+
+Removed confusing comments from cancel_check() about legacy division operation
+
+Nov 13 to date
+
+Added two new three new voices.
+
+Got rid of "icing_overplay" and folded its function into a new much larger
+general overplay buffer which exists so I can set notes across multiple
+half-bar iterations.
+
+There were a few tempos that crashed for this and that reason.  Think I fixed
+all that shit.
+
+-- push was here
 

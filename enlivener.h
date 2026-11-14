@@ -35,9 +35,18 @@
 #define FILL_TRIANGLE	1
 #define FILL_MAX	2
 
-#define FILL_LEVEL	5120
+#define FILL_PAN_SPAN	6
 
-#define	MID_LEVEL	12288
+#define FILL_LEVEL	1536
+
+#define FILL_SUSTAIN	8	// In half-bars
+#define FILL_FREQ	4
+
+#define FILL_HAAS	48
+
+#define BACKUP_HAAS	36
+
+#define	MID_LEVEL	1792
 
 #define MID_HAAS	64
 
@@ -144,6 +153,9 @@
 #define SINE_EIGHTH	(AUDIO_READ/2)
 #define SINE_SIXTEENTH	(AUDIO_READ/4)	// per above will fade this entire note
 
+#define SINE_HALF	(SINE_QUARTER*2)
+
+#define SYNTH_BUF_SIZE	(SINE_HALF*8)
 
 #define BASS_FADE	1024
 #define BASS_FADE_FLOOR	512
@@ -156,7 +168,7 @@
 
 #define BASS_REF_VAL	(16384+8192)
 
-#define BASS_PEAK	(16384+4096)
+#define BASS_PEAK	12288
 
 #define BASS_ATTACK	(3072)
 
@@ -208,7 +220,7 @@ typedef struct {
 	short	*eighth;	
 } ICING;
 
-#define ICING_LEVEL	8192
+#define ICING_LEVEL	6144
 #define	ICING_OFFSET	3072
 
 typedef struct {
@@ -285,10 +297,10 @@ typedef struct {
 
 typedef struct {
 	short	*samples[12];
-	int	position_l[12];
-	int	position_r[12];
-	int 	phase_cur_left;
-	int	phase_cur_right;
+//	int	position_l[12];
+//	int	position_r[12];
+//	int 	phase_cur_left;
+//	int	phase_cur_right;
 } FILL;
 
 typedef struct {
