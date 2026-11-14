@@ -33,11 +33,19 @@
 
 #define FILL_SQUARE	0
 #define FILL_TRIANGLE	1
-#define FILL_MAX	2
+#define FILL_SINE	2
+#define FILL_COSINE	3
+#define FILL_MAX	4
 
 #define FILL_PAN_SPAN	6
 
 #define FILL_LEVEL	1536
+
+#define FILL_SINE_FLOOR	0
+#define FILL_SINE_PEAK	FILL_LEVEL
+
+#define FILL_COSINE_FLOOR	0
+#define FILL_COSINE_PEAK	FILL_LEVEL
 
 #define FILL_SUSTAIN	8	// In half-bars
 #define FILL_FREQ	4

@@ -255,6 +255,7 @@ void fill_sequence(buf,top_tones)
 short	*buf;
 int	*top_tones;
 {
+bool	fill_waves_on;
 
 int	square_haas_l;
 int	square_haas_r;
@@ -276,14 +277,33 @@ int	sample_int;
 
 int	note;
 
+int	sine_variance;
+int	cosine_variance;
+
+int	sine_peak_position;
+int	cosine_peak_position;
+
+int	sine_level;
+int	cosine_level;
+
 square_haas_l=(rand()%FILL_HAAS);
 square_haas_r=(rand()%FILL_HAAS);
 tri_haas_l=(rand()%FILL_HAAS);
 tri_haas_r=(rand()%FILL_HAAS);
 
+	sine_peak_position=(rand()%(FILL_PAN_SPAN*SINE_HALF));
+	cosine_peak_position=(rand()%(FILL_PAN_SPAN*SINE_HALF));
+	
+	sine_variance=FILL_SINE_PEAK-FILL_SINE_FLOOR;
+	cosine_variance=FILL_COSINE_PEAK-FILL_COSINE_FLOOR;
+
+	fill_waves_on=true;
+		
 //	printf("\n\n%d %d %d\n",top_tones[0],top_tones[1],top_tones[2]);
 	for(c=0;c<FILL_PAN_SPAN*SINE_HALF;c++) {
 
+
+		
 		square_level_l=fill_pan_present;
 		tri_level_r=fill_pan_present;
 		
@@ -297,6 +317,7 @@ tri_haas_r=(rand()%FILL_HAAS);
 		
 		tri_level_l=(tri_level_l*level)/32767;
 		tri_level_r=(tri_level_r*level)/32767;
+
 
 /*
 square_level_l=32767;
@@ -316,7 +337,78 @@ if(top_tones[note]==-1) continue;
 
 //putchar('\n');
 //putchar('\n');
+/////////
+
+//int	mynote;
+
+//if(c<(FILL_PAN_SPAN*SINE_HALF)) mynote=0;
+//else if(c<(FILL_PAN_SPAN*SINE_HALF)+(FILL_PAN_SPAN*SINE_QUARTER)) mynote=1;
+//else mynote=2;
+
+//if(note==mynote) {
+
+
+if((c%SINE_EIGHTH)==0) {
+	fill_waves_on=true;
+	if((rand()%4))fill_waves_on=false;
+}
+
+if(fill_waves_on) {
+
+		if(c<sine_peak_position) {
+			sine_level=((sine_variance*c)/sine_peak_position)+
+			FILL_SINE_FLOOR;
+		} else {
 		
+sine_level=((((FILL_PAN_SPAN*SINE_HALF)-sine_peak_position)
+		*sine_variance)/(FILL_PAN_SPAN*SINE_HALF))+FILL_SINE_FLOOR;
+		
+		}
+		
+		sample_int=fill[FILL_SINE].samples[top_tones[note]][c];
+		sample_int=(sample_int*sine_level)/32767;
+		sample_int+=buf[stereoL(c)];		
+		if(sample_int>32767)sample_int=32767;
+		if(sample_int<-32768)sample_int=-32768;	
+		buf[stereoL(c)]=sample_int;
+		
+		sample_int=fill[FILL_SINE].samples[top_tones[note]][c];
+		sample_int=(sample_int*sine_level)/32767;
+		sample_int+=buf[stereoR(c)];		
+		if(sample_int>32767)sample_int=32767;
+		if(sample_int<-32768)sample_int=-32768;	
+		buf[stereoR(c)]=sample_int;
+
+
+/////////
+
+		if(c<cosine_peak_position) {
+			cosine_level=((cosine_variance*c)/cosine_peak_position)+
+			FILL_COSINE_FLOOR;
+		} else {
+		
+cosine_level=((((FILL_PAN_SPAN*SINE_HALF)-cosine_peak_position)
+		*cosine_variance)/(FILL_PAN_SPAN*SINE_HALF))+FILL_COSINE_FLOOR;
+		
+		}
+		
+		sample_int=fill[FILL_COSINE].samples[top_tones[note]][c];
+		sample_int=(sample_int*cosine_level)/32767;
+		sample_int+=buf[stereoL(c)];		
+		if(sample_int>32767)sample_int=32767;
+		if(sample_int<-32768)sample_int=-32768;	
+		buf[stereoL(c)]=sample_int;
+		
+		sample_int=fill[FILL_COSINE].samples[top_tones[note]][c];
+		sample_int=(sample_int*cosine_level)/32767;
+		sample_int+=buf[stereoR(c)];		
+		if(sample_int>32767)sample_int=32767;
+		if(sample_int<-32768)sample_int=-32768;	
+		buf[stereoR(c)]=sample_int;
+
+}
+
+///////////		
 
 	sample_int=fill[FILL_SQUARE].samples[top_tones[note]][c];
 	sample_int=(sample_int*square_level_l)/32767;
@@ -3145,7 +3237,7 @@ double	period;
 double	step;
 double	angle;
 double	my_sin;
-
+double  my_cos;
 int	note;
 int	s_index;
 int	t_index;
@@ -3165,11 +3257,24 @@ int	t_index;
 	
 	fill[FILL_TRIANGLE].samples[note]=
 	malloc(FILL_SUSTAIN*SINE_HALF*sizeof(short));
-		
+
+	fill[FILL_SINE].samples[note]=
+	malloc(FILL_SUSTAIN*SINE_HALF*sizeof(short));
+	
+	fill[FILL_COSINE].samples[note]=
+	malloc(FILL_SUSTAIN*SINE_HALF*sizeof(short));
+
 		for(s_index=0;s_index<FILL_SUSTAIN*SINE_HALF;s_index++) {
 		
 			my_sin=sin(angle);
+			my_cos=cos(angle);
 			
+		fill[FILL_SINE].samples[note][s_index]=
+		(short)(my_sin*32767);
+		
+		fill[FILL_COSINE].samples[note][s_index]=
+		(short)(my_cos*32767);
+		
 		fill[FILL_SQUARE].samples[note][s_index]=(my_sin>0)?
 		FILL_LEVEL:
 		FILL_LEVEL*-1;
@@ -3199,7 +3304,7 @@ fill[FILL_SQUARE].samples[note][s_index-1]) {
 	}
 	
 	angle+=step;
-	if(angle>(2*M_PI))angle-=(2*M_PI);
+	if(angle>=(2*M_PI))angle-=(2*M_PI);
 	}
 	}
 /*	
