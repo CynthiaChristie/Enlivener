@@ -41,11 +41,11 @@
 
 #define FILL_LEVEL	1536
 
-#define FILL_SINE_FLOOR	0
-#define FILL_SINE_PEAK	FILL_LEVEL
+#define FILL_SINE_FLOOR (FILL_LEVEL/4)
+#define FILL_SINE_PEAK	((FILL_LEVEL*3)/1)
 
 #define FILL_COSINE_FLOOR	0
-#define FILL_COSINE_PEAK	FILL_LEVEL
+#define FILL_COSINE_PEAK	((FILL_LEVEL*3)/2)
 
 #define FILL_SUSTAIN	8	// In half-bars
 #define FILL_FREQ	4
@@ -100,7 +100,7 @@
 
 
 #define BPM_MIN		60
-#define BPM_MAX		240
+#define BPM_MAX		300
 
 
 

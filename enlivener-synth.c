@@ -348,9 +348,9 @@ if(top_tones[note]==-1) continue;
 //if(note==mynote) {
 
 
-if((c%SINE_EIGHTH)==0) {
+if((c%SINE_SIXTEENTH)==0) {
 	fill_waves_on=true;
-	if((rand()%4))fill_waves_on=false;
+	if((rand()%4)==0)fill_waves_on=false;
 }
 
 if(fill_waves_on) {
