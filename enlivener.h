@@ -212,6 +212,10 @@
 
 #define	VOL_MAX		7
 
+#define BEEP_DISTORTER	128
+
+#define BASS_BACK_TRACE	24
+
 typedef struct	{
 	int	tone;
 	long	played_at;

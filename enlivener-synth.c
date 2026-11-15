@@ -1608,6 +1608,26 @@ int	harmonic_adjust;
 
 int	mute_early;
 
+short	*p;
+int	back_trace;
+
+	back_trace=0;
+	p=buf;
+	
+	while((p>audio)&&(back_trace<BASS_BACK_TRACE)) {
+		--p;
+		++back_trace;
+	}
+	
+	if(back_trace>0) for(c=0;c<back_trace;c++) {
+		sample_int_l=p[c];
+		
+		sample_int_l=((sample_int_l*back_trace)/((c==0)?1:c))
+		-sample_int_l;
+		
+		p[c]=sample_int_l;
+	}
+	
 	oct_delay_l=(rand()%MAX_TRANS_DELAY);
 	oct_delay_r=(rand()%MAX_TRANS_DELAY);
 
@@ -3601,6 +3621,8 @@ int	sample_join;
 int	l_haas;
 int	r_haas;
 
+//int	level;
+
 	for(c=0;c<SINE_SIXTEENTH;c++) {
 	
 		sample_int=freq[tone]->quarter[0].fundamental[c*4];
@@ -3609,9 +3631,14 @@ int	r_haas;
 		sample_int+=freq[tone]->quarter[0].fourth[c*4];
 		sample_int+=freq[tone]->quarter[0].fifth[c*4];
 
-		sample_int/=10;
+		sample_int*=BEEP_DISTORTER;
 
-		sample_int=sample_int*sample_int;
+		if(sample_int>32767)sample_int=32767;
+		if(sample_int<-32768)sample_int=-32768;		
+		
+		sample_int/=BEEP_DISTORTER;
+
+//		sample_int=sample_int*sample_int;
 		
 		
 		sample_int=(sample_int*front_info->vol[VOL_BEEP])/100;

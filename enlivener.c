@@ -391,11 +391,19 @@ struct sigaction sa;
 		(d>=0)
 		&&
 		(d<=500) &&
-		(vol_arg<VOL_MAX)) {
+		(vol_arg<=VOL_MAX)) {
+if(vol_arg<VOL_MAX) {
 			printf("It's volume - assigning to %s.\n",
 			vol_label[vol_arg]);
 			front_info->vol[vol_arg]=d;
 			vol_arg++;
+} else {
+int e;
+			printf("This is the master volume.\n");
+			for(e=0;e<VOL_MAX;e++)
+			front_info->vol[e]=(front_info->vol[e]*d)/100;
+}
+
 		/*	if(!found_bass_vol) {
 				printf("bass synth.\n");
 				found_bass_vol=true;
