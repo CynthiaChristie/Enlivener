@@ -100,7 +100,7 @@
 
 
 #define BPM_MIN		60
-#define BPM_MAX		300
+#define BPM_MAX		400
 
 
 
@@ -130,8 +130,10 @@
 
 
 
-#define FRONT_BASS_VOLUME	50
-#define	FRONT_DRUM_VOLUME	50
+// #define FRONT_BASS_VOLUME	50
+// #define	FRONT_DRUM_VOLUME	50
+#define	VOL_DEFAULT	50
+
 
 #define MAX_NO_SOUND	24
 
@@ -199,6 +201,16 @@
 #define IS_QUARTER	0x00
 #define	IS_EIGHTH	0x01
 #define IS_SIXTEENTH	0x02
+
+#define	VOL_DRUMS	0
+#define VOL_BASS	1
+#define	VOL_TINKLE	2	// "icing"
+#define VOL_ROUGH	3	// "fill" - squares and tris
+#define	VOL_ROUNDER	4	// "fill" - sines and cosines
+#define	VOL_BEEP	5	// "mid"
+#define	VOL_BIP		6	// "backup"
+
+#define	VOL_MAX		7
 
 typedef struct	{
 	int	tone;
@@ -297,8 +309,9 @@ typedef struct {
 	bool	reached_end;
 	int	tones[3];
 	int	bpm;
-	int	bass_vol;
-	int	drum_vol;	
+//	int	bass_vol;
+//	int	drum_vol;	
+	int	vol[VOL_MAX];
 	int		note_history_index;
 	NOTE_HISTORY	note_history[NOTE_HISTORY_LIMIT];
 } FRONT_INFO;

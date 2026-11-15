@@ -309,9 +309,17 @@ tri_haas_r=(rand()%FILL_HAAS);
 		
 		square_level_r=65535-square_level_l;
 		tri_level_l=square_level_r;
+
+		square_level_l/=2;
+		square_level_r/=2;
+		
+		tri_level_l/=2;
+		tri_level_r/=2;
 		
 		level=(32767*(FILL_PAN_SPAN-c))/FILL_PAN_SPAN;
-		
+
+		level=(level*front_info->vol[VOL_ROUGH])/100;
+				
 		square_level_l=(square_level_l*level)/32767;
 		square_level_r=(square_level_r*level)/32767;
 		
@@ -334,6 +342,13 @@ tri_level_r=32767;
 for(note=0;note<3;note++) {
 
 if(top_tones[note]==-1) continue;
+
+if(note==1) if(abs(top_tones[0]-top_tones[1])<3) continue;
+
+if(note==2) {
+	if(abs(top_tones[0]-top_tones[2])<3) continue;
+	if(abs(top_tones[1]-top_tones[2])<3) continue;
+}
 
 //putchar('\n');
 //putchar('\n');
@@ -364,6 +379,7 @@ sine_level=((((FILL_PAN_SPAN*SINE_HALF)-sine_peak_position)
 		*sine_variance)/(FILL_PAN_SPAN*SINE_HALF))+FILL_SINE_FLOOR;
 		
 		}
+		sine_level=(sine_level*front_info->vol[VOL_ROUNDER])/100;
 		
 		sample_int=fill[FILL_SINE].samples[top_tones[note]][c];
 		sample_int=(sample_int*sine_level)/32767;
@@ -391,6 +407,7 @@ cosine_level=((((FILL_PAN_SPAN*SINE_HALF)-cosine_peak_position)
 		*cosine_variance)/(FILL_PAN_SPAN*SINE_HALF))+FILL_COSINE_FLOOR;
 		
 		}
+		cosine_level=(cosine_level*front_info->vol[VOL_ROUNDER])/100;
 		
 		sample_int=fill[FILL_COSINE].samples[top_tones[note]][c];
 		sample_int=(sample_int*cosine_level)/32767;
@@ -774,46 +791,17 @@ int	this_ice;
 // int	first_tone;
 // int	second_tone;
 
-short	*target_sample;
-short	fuck_off;
+// short	*target_sample;
+//	short	fuck_off;	I have no idea why I said such a terrible thing.
+//				short welcome;  So there!
+
+//
+// It was because there was briefly an experimental bug fix that needed
+// a short-sized sink object.  
+//
 
 	ice_tones_index=0;
 
-//
-// icing_have_overplay is a global bool that's set at the end of this function,
-// and what it means it there's a little bit of audio overwrite from the last
-// iteration that should have this mixed over top of it.  This is because
-// of random phase shifting for tone reasons	
-	
-// The rest is as obvious as it appears: Get notes from the two available
-// sources and write notes accordingly all over the buffer according to the
-// logic driven by misc rand() calls.
-
-//	if(icing_have_overplay) {
-
-/*
-		for(c=0;c<((SINE_QUARTER*
-		(icing_have_overplay?2:0)
-		)+ICING_OFFSET);c++) {
-			sample_int=buf[c*2];
-			sample_int+=icing_overplay[c*2];
-			icing_overplay[c*2]=0;
-			if(sample_int>32767)sample_int=32767;
-			if(sample_int<-32768)sample_int=-32768;
-			buf[c*2]=sample_int;
-			
-			sample_int=buf[(c*2)+1];
-			sample_int+=icing_overplay[(c*2)+1];
-			icing_overplay[(c*2)+1]=0;
-			if(sample_int>32767)sample_int=32767;
-			if(sample_int<-32768)sample_int=-32768;
-			buf[(c*2)+1]=sample_int;
-		}
-		icing_have_overplay=false;
-		
-*/
-
-//	}
 	for(c=0;c<12;c++) have_this[c]=false;
 	
 	for(c=0;c<accents_count;c++) {
@@ -842,44 +830,91 @@ short	fuck_off;
 		r_offset=(rand()%ICING_OFFSET);
 		
 		for(c=0;c<SINE_QUARTER*2;c++) {
-/*
-			target_sample=((c+l_offset)<(SINE_QUARTER*2))
-			?&(buf[(c+l_offset)*2]):
-		&(icing_overplay[stereoL((c+l_offset)-(SINE_QUARTER*2))]);
+
+//			target_sample=&(buf[stereoL(c+l_offset)]);	
+//			sample_int=buf[(c+l_offset)*2];
+//			sample_int=*target_sample;
+//			sample_int+=icing[ps_tones[0]+octave]->half[c];
+
+
+/// <- New Tinkle Volume Frame
+			sample_int=icing[ps_tones[0]+octave]->half[c];
+			sample_int=(sample_int*
+			front_info->vol[VOL_TINKLE])/100;
+			sample_int+=buf[stereoL(c+l_offset)];
+					
+			if(sample_int>32767) sample_int=32767;
+			if(sample_int<-32768) sample_int=-32768;
+			
+			buf[stereoL(c+l_offset)]=sample_int;
+/// <- New Tinkle Frame (woof!  ssss...)
+			
+/*			
+			*target_sample=sample_int;
+			target_sample=&(buf[stereoR(c+r_offset)]);
+			sample_int=*target_sample;
+			sample_int+=icing[ps_tones[0]+octave]->half[c];
+			if(sample_int>32767) sample_int=32767;
+			if(sample_int<-32768) sample_int=-32768;
+			*target_sample=sample_int;
+*/			
+/// <- New Tinkle Volume Frame
+			sample_int=icing[ps_tones[0]+octave]->half[c];
+			sample_int=(sample_int*
+			front_info->vol[VOL_TINKLE])/100;
+			sample_int+=buf[stereoR(c+r_offset)];
+					
+			if(sample_int>32767) sample_int=32767;
+			if(sample_int<-32768) sample_int=-32768;
+			
+			buf[stereoR(c+r_offset)]=sample_int;
+/// <- New Tinkle Frame (woof!  ssss...)
+		}
+		l_offset=(rand()%ICING_OFFSET);
+		r_offset=(rand()%ICING_OFFSET);
+		octave=(rand()%2)*12;
+		if(rand()%2)
+		for(c=0;c<SINE_QUARTER*2;c++) {
+/*		
+			target_sample=&(buf[stereoL(c+l_offset)]);
+			sample_int=*target_sample;
+			sample_int+=icing[ps_tones[1]+octave]->half[c];
+			if(sample_int>32767) sample_int=32767;
+			if(sample_int<-32768) sample_int=-32768;
+			*target_sample=sample_int;
 */
-
-			target_sample=&(buf[stereoL(c+l_offset)]);	
-
-//			sample_int=buf[(c+l_offset)*2];
-
-			sample_int=*target_sample;
-			sample_int+=icing[ps_tones[0]+octave]->half[c];
-			
+/// <- New Tinkle Volume Frame
+			sample_int=icing[ps_tones[1]+octave]->half[c];
+			sample_int=(sample_int*
+			front_info->vol[VOL_TINKLE])/100;
+			sample_int+=buf[stereoL(c+l_offset)];
+					
 			if(sample_int>32767) sample_int=32767;
 			if(sample_int<-32768) sample_int=-32768;
 			
-//			buf[(c+l_offset)*2]=sample_int;
-			*target_sample=sample_int;
+			buf[stereoL(c+l_offset)]=sample_int;
+/// <- New Tinkle Frame (woof!  ssss...)
 
-
-			
-//			target_sample=((c+r_offset)<(SINE_QUARTER*2))
-//			?&(buf[((c+r_offset)*2)+1]):
-//	&(icing_overplay[stereoR((c+r_offset)-(SINE_QUARTER*2))]);
-
-
+/*
 			target_sample=&(buf[stereoR(c+r_offset)]);
-									
 			sample_int=*target_sample;
-			
-//			sample_int=buf[((c+r_offset)*2)+1];
-			sample_int+=icing[ps_tones[0]+octave]->half[c];
-			
+			sample_int+=icing[ps_tones[1]+octave]->half[c];
 			if(sample_int>32767) sample_int=32767;
 			if(sample_int<-32768) sample_int=-32768;
-
 			*target_sample=sample_int;			
-//			buf[((c+r_offset)*2)+1]=sample_int;
+*/
+/// <- New Tinkle Volume Frame
+			sample_int=icing[ps_tones[1]+octave]->half[c];
+			sample_int=(sample_int*
+			front_info->vol[VOL_TINKLE])/100;
+			sample_int+=buf[stereoR(c+r_offset)];
+					
+			if(sample_int>32767) sample_int=32767;
+			if(sample_int<-32768) sample_int=-32768;
+			
+			buf[stereoR(c+r_offset)]=sample_int;
+/// <- New Tinkle Frame (woof!  ssss...)
+
 		}
 		l_offset=(rand()%ICING_OFFSET);
 		r_offset=(rand()%ICING_OFFSET);
@@ -887,83 +922,46 @@ short	fuck_off;
 		if(rand()%2)
 		for(c=0;c<SINE_QUARTER*2;c++) {
 		
-//			target_sample=((c+l_offset)<(SINE_QUARTER*2))
-//			?&(buf[(c+l_offset)*2]):
-//		&(icing_overplay[stereoL((c+l_offset)-(SINE_QUARTER*2))]);
-			
-
-//			sample_int=buf[(c+l_offset)*2];
-
+/*
 			target_sample=&(buf[stereoL(c+l_offset)]);
-			
-			sample_int=*target_sample;
-			sample_int+=icing[ps_tones[1]+octave]->half[c];
-			
-			if(sample_int>32767) sample_int=32767;
-			if(sample_int<-32768) sample_int=-32768;
-			
-//			buf[(c+l_offset)*2]=sample_int;
-			*target_sample=sample_int;
-			
-//			target_sample=((c+r_offset)<(SINE_QUARTER*2))
-//			?&(buf[((c+r_offset)*2)+1]):
-//	&(icing_overplay[stereoR((c+r_offset)-(SINE_QUARTER*2))]);
-
-			target_sample=&(buf[stereoR(c+r_offset)]);
-									
-			sample_int=*target_sample;
-			
-//			sample_int=buf[((c+r_offset)*2)+1];
-			sample_int+=icing[ps_tones[1]+octave]->half[c];
-			
-			if(sample_int>32767) sample_int=32767;
-			if(sample_int<-32768) sample_int=-32768;
-
-			*target_sample=sample_int;			
-//			buf[((c+r_offset)*2)+1]=sample_int;
-		}
-		l_offset=(rand()%ICING_OFFSET);
-		r_offset=(rand()%ICING_OFFSET);
-		octave=(rand()%2)*12;
-		if(rand()%2)
-		for(c=0;c<SINE_QUARTER*2;c++) {
-		
-		
-//			target_sample=((c+l_offset)<(SINE_QUARTER*2))
-//			?&(buf[(c+l_offset)*2]):
-//		&(icing_overplay[stereoL((c+l_offset)-(SINE_QUARTER*2))]);
-			
-
-//			sample_int=buf[(c+l_offset)*2];
-
-
-			target_sample=&(buf[stereoL(c+l_offset)]);
-			
 			sample_int=*target_sample;
 			sample_int+=icing[ps_tones[2]+octave]->half[c];
-			
 			if(sample_int>32767) sample_int=32767;
 			if(sample_int<-32768) sample_int=-32768;
-			
-//			buf[(c+l_offset)*2]=sample_int;
 			*target_sample=sample_int;
-			
-//			target_sample=((c+r_offset)<(SINE_QUARTER*2))
-//			?&(buf[((c+r_offset)*2)+1]):
-//	&(icing_overplay[stereoR((c+r_offset)-(SINE_QUARTER*2))]);
-
-			target_sample=&(buf[stereoR(c+r_offset)]);
-									
-			sample_int=*target_sample;
-			
-//			sample_int=buf[((c+r_offset)*2)+1];
-			sample_int+=icing[ps_tones[2]+octave]->half[c];
-			
+*/
+/// <- New Tinkle Volume Frame
+			sample_int=icing[ps_tones[2]+octave]->half[c];
+			sample_int=(sample_int*
+			front_info->vol[VOL_TINKLE])/100;
+			sample_int+=buf[stereoL(c+l_offset)];
+					
 			if(sample_int>32767) sample_int=32767;
 			if(sample_int<-32768) sample_int=-32768;
+			
+			buf[stereoL(c+l_offset)]=sample_int;
+/// <- New Tinkle Frame (woof!  ssss...)
 
+/*
+			target_sample=&(buf[stereoR(c+r_offset)]);
+			sample_int=*target_sample;
+			sample_int+=icing[ps_tones[2]+octave]->half[c];
+			if(sample_int>32767) sample_int=32767;
+			if(sample_int<-32768) sample_int=-32768;
 			*target_sample=sample_int;			
-//			buf[((c+r_offset)*2)+1]=sample_int;
+*/
+/// <- New Tinkle Volume Frame
+			sample_int=icing[ps_tones[2]+octave]->half[c];
+			sample_int=(sample_int*
+			front_info->vol[VOL_TINKLE])/100;
+			sample_int+=buf[stereoR(c+r_offset)];
+					
+			if(sample_int>32767) sample_int=32767;
+			if(sample_int<-32768) sample_int=-32768;
+			
+			buf[stereoR(c+r_offset)]=sample_int;
+/// <- New Tinkle Frame (woof!  ssss...)
+
 		}
 	} else {
 this_ice=ice_tones[rand()%ice_tones_index];
@@ -975,41 +973,45 @@ case 0:
 		r_offset=(rand()%ICING_OFFSET);
 		for(c=0;c<SINE_QUARTER;c++) {
 
-//
-//			target_sample=((c+l_offset)<(SINE_QUARTER*2))
-//			?&(buf[(c+l_offset)*2]):
-//		&(icing_overplay[stereoL((c+l_offset)-(SINE_QUARTER*2))]);
-//			
-
+/*
 			target_sample=&(buf[stereoL(c+l_offset)]);			
 			sample_int=*target_sample;			
-//			sample_int=buf[(c+l_offset)*2];
 			sample_int+=icing[this_ice+octave]->quarter[c];
-			
+			if(sample_int>32767) sample_int=32767;
+			if(sample_int<-32768) sample_int=-32768;
+			*target_sample=sample_int;			
+*/
+/// <- New Tinkle Volume Frame
+			sample_int=icing[this_ice+octave]->quarter[c];
+			sample_int=(sample_int*
+			front_info->vol[VOL_TINKLE])/100;
+			sample_int+=buf[stereoL(c+l_offset)];
+					
 			if(sample_int>32767) sample_int=32767;
 			if(sample_int<-32768) sample_int=-32768;
 			
+			buf[stereoL(c+l_offset)]=sample_int;
+/// <- New Tinkle Frame (woof!  ssss...)
 
-			*target_sample=sample_int;			
-//			buf[(c+l_offset)*2]=sample_int;
-
-
-//			target_sample=((c+r_offset)<(SINE_QUARTER*2))
-//			?&(buf[((c+r_offset)*2)+1]):
-//	&(icing_overplay[stereoR((c+r_offset)-(SINE_QUARTER*2))]);
-			
-
+/*
 			target_sample=&(buf[stereoR(c+r_offset)]);			
 			sample_int=*target_sample;						
-//			sample_int=buf[((c+r_offset)*2)+1];
 			sample_int+=icing[this_ice+octave]->quarter[c];
-			
 			if(sample_int>32767) sample_int=32767;
 			if(sample_int<-32768) sample_int=-32768;
-
 			*target_sample=sample_int;			
-//			buf[((c+r_offset)*2)+1]=sample_int;
-
+*/
+/// <- New Tinkle Volume Frame
+			sample_int=icing[this_ice+octave]->quarter[c];
+			sample_int=(sample_int*
+			front_info->vol[VOL_TINKLE])/100;
+			sample_int+=buf[stereoR(c+r_offset)];
+					
+			if(sample_int>32767) sample_int=32767;
+			if(sample_int<-32768) sample_int=-32768;
+			
+			buf[stereoR(c+r_offset)]=sample_int;
+/// <- New Tinkle Frame (woof!  ssss...)
 		}
 		break;
 		
@@ -1018,42 +1020,47 @@ case 1:		octave=(rand()%2)*12;
 		r_offset=(rand()%ICING_OFFSET);
 		for(c=0;c<SINE_EIGHTH;c++) {
 
-//
-//			target_sample=((c+l_offset)<(SINE_QUARTER*2))
-//			?&(buf[(c+l_offset)*2]):
-//		&(icing_overplay[stereoL((c+l_offset)-(SINE_QUARTER*2))]);
-//
-
+/*
 			target_sample=&(buf[stereoL(c+l_offset)]);
 			sample_int=*target_sample;
-
-//			sample_int=buf[(c+l_offset)*2];
 			sample_int+=icing[this_ice+octave]->eighth[c];
-			
+			if(sample_int>32767) sample_int=32767;
+			if(sample_int<-32768) sample_int=-32768;
+			*target_sample=sample_int;
+*/
+/// <- New Tinkle Volume Frame
+			sample_int=icing[this_ice+octave]->eighth[c];
+			sample_int=(sample_int*
+			front_info->vol[VOL_TINKLE])/100;
+			sample_int+=buf[stereoL(c+l_offset)];
+					
 			if(sample_int>32767) sample_int=32767;
 			if(sample_int<-32768) sample_int=-32768;
 			
-			*target_sample=sample_int;
+			buf[stereoL(c+l_offset)]=sample_int;
+/// <- New Tinkle Frame (woof!  ssss...)
 
-//			buf[(c+l_offset)*2]=sample_int;
 
-
-//			target_sample=((c+r_offset)<(SINE_QUARTER*2))
-//			?&(buf[((c+r_offset)*2)+1]):
-//	&(icing_overplay[stereoR((c+r_offset)-(SINE_QUARTER*2))]);
-
+/*
 			target_sample=&(buf[stereoR(c+r_offset)]);
 			sample_int=*target_sample;
-						
-//			sample_int=buf[((c+r_offset)*2)+1];
 			sample_int+=icing[this_ice+octave]->eighth[c];
-			
+			if(sample_int>32767) sample_int=32767;
+			if(sample_int<-32768) sample_int=-32768;
+			*target_sample=sample_int;
+*/
+/// <- New Tinkle Volume Frame
+			sample_int=icing[this_ice+octave]->eighth[c];
+			sample_int=(sample_int*
+			front_info->vol[VOL_TINKLE])/100;
+			sample_int+=buf[stereoR(c+r_offset)];
+					
 			if(sample_int>32767) sample_int=32767;
 			if(sample_int<-32768) sample_int=-32768;
 			
-			*target_sample=sample_int;
+			buf[stereoR(c+r_offset)]=sample_int;
+/// <- New Tinkle Frame (woof!  ssss...)
 
-//			buf[((c+r_offset)*2)+1]=sample_int;
 
 		}
 		octave=(rand()%2)*12;
@@ -1062,41 +1069,45 @@ case 1:		octave=(rand()%2)*12;
 		for(c=0;c<SINE_EIGHTH;c++) {
 
 
-//
-//		target_sample=((c+SINE_EIGHTH+l_offset)<(SINE_QUARTER*2))
-//		?&(buf[(c+SINE_EIGHTH+l_offset)*2]):
-//&(icing_overplay[stereoL((c+SINE_EIGHTH+l_offset)-(SINE_QUARTER*2))]);
-//
+/*
 			target_sample=&(buf[stereoL(c+SINE_EIGHTH+l_offset)]);
 			sample_int=*target_sample;
-
-//			sample_int=buf[(SINE_EIGHTH+c+l_offset)*2];
 			sample_int+=icing[this_ice+octave]->eighth[c];
-			
 			if(sample_int>32767) sample_int=32767;
 			if(sample_int<-32768) sample_int=-32768;
-
 			*target_sample=sample_int;			
-//			buf[(SINE_EIGHTH+c+l_offset)*2]=sample_int;
+*/			
+/// <- New Tinkle Volume Frame
+			sample_int=icing[this_ice+octave]->eighth[c];
+			sample_int=(sample_int*
+			front_info->vol[VOL_TINKLE])/100;
+			sample_int+=buf[stereoL(c+SINE_EIGHTH+l_offset)];
+					
+			if(sample_int>32767) sample_int=32767;
+			if(sample_int<-32768) sample_int=-32768;
 			
+			buf[stereoL(c+SINE_EIGHTH+l_offset)]=sample_int;
+/// <- New Tinkle Frame (woof!  ssss...)
 
-
-//		target_sample=((c+SINE_EIGHTH+r_offset)<(SINE_QUARTER*2))
-//		?&(buf[((c+SINE_EIGHTH+r_offset)*2)+1]):
-//&(icing_overplay[stereoR((c+SINE_EIGHTH+r_offset)-(SINE_QUARTER*2))]);
-
-
+/*
 			target_sample=&(buf[stereoR(c+SINE_EIGHTH+r_offset)]);
 			sample_int=*target_sample;
-						
-//			sample_int=buf[((SINE_EIGHTH+c+r_offset)*2)+1];
 			sample_int+=icing[this_ice+octave]->eighth[c];
-			
+			if(sample_int>32767) sample_int=32767;
+			if(sample_int<-32768) sample_int=-32768;
+			*target_sample=sample_int;
+*/
+/// <- New Tinkle Volume Frame
+			sample_int=icing[this_ice+octave]->eighth[c];
+			sample_int=(sample_int*
+			front_info->vol[VOL_TINKLE])/100;
+			sample_int+=buf[stereoR(c+SINE_EIGHTH+r_offset)];
+					
 			if(sample_int>32767) sample_int=32767;
 			if(sample_int<-32768) sample_int=-32768;
 			
-			*target_sample=sample_int;
-//			buf[((SINE_EIGHTH+c+r_offset)*2)+1]=sample_int;
+			buf[stereoR(c+SINE_EIGHTH+r_offset)]=sample_int;
+/// <- New Tinkle Frame (woof!  ssss...)
 
 		}
 		break;
@@ -1107,41 +1118,45 @@ case 2: 	octave=(rand()%2)*12;
 
 		for(c=0;c<SINE_EIGHTH;c++) {
 		
-//
-//			target_sample=((c+l_offset)<(SINE_QUARTER*2))
-//			?&(buf[(c+l_offset)*2]):
-//		&(icing_overplay[stereoL((c+l_offset)-(SINE_QUARTER*2))]);
-//			
-
+/*
 			target_sample=&(buf[stereoL(c+l_offset)]);
 			sample_int=*target_sample;
-
-//			sample_int=buf[(c+l_offset)*2];
 			sample_int+=icing[this_ice+octave]->eighth[c];
-			
 			if(sample_int>32767) sample_int=32767;
 			if(sample_int<-32768) sample_int=-32768;
-
 			*target_sample=sample_int;			
-//			buf[(c+l_offset)*2]=sample_int;
+*/
+/// <- New Tinkle Volume Frame
+			sample_int=icing[this_ice+octave]->eighth[c];
+			sample_int=(sample_int*
+			front_info->vol[VOL_TINKLE])/100;
+			sample_int+=buf[stereoL(c+l_offset)];
+					
+			if(sample_int>32767) sample_int=32767;
+			if(sample_int<-32768) sample_int=-32768;
+			
+			buf[stereoL(c+l_offset)]=sample_int;
+/// <- New Tinkle Frame (woof!  ssss...)
 
-//			target_sample=((c+r_offset)<(SINE_QUARTER*2))
-//			?&(buf[((c+r_offset)*2)+1]):
-//	&(icing_overplay[stereoR((c+r_offset)-(SINE_QUARTER*2))]);
-
+/*
 			target_sample=&(buf[stereoR(c+r_offset)]);
 			sample_int=*target_sample;
-						
-//			sample_int=buf[((c+r_offset)*2)+1];
 			sample_int+=icing[this_ice+octave]->eighth[c];
-			
+			if(sample_int>32767) sample_int=32767;
+			if(sample_int<-32768) sample_int=-32768;
+			*target_sample=sample_int;
+*/
+/// <- New Tinkle Volume Frame
+			sample_int=icing[this_ice+octave]->eighth[c];
+			sample_int=(sample_int*
+			front_info->vol[VOL_TINKLE])/100;
+			sample_int+=buf[stereoR(c+r_offset)];
+					
 			if(sample_int>32767) sample_int=32767;
 			if(sample_int<-32768) sample_int=-32768;
 			
-			*target_sample=sample_int;
-
-//			buf[((c+r_offset)*2)+1]=sample_int;
-
+			buf[stereoR(c+r_offset)]=sample_int;
+/// <- New Tinkle Frame (woof!  ssss...)
 		}
 		break;
 		
@@ -1150,44 +1165,45 @@ case 3:		octave=(rand()%2)*12;
 		r_offset=(rand()%ICING_OFFSET);
 		for(c=0;c<SINE_EIGHTH;c++) {
 		
-		
-//
-//		target_sample=((c+SINE_EIGHTH+l_offset)<(SINE_QUARTER*2))
-//		?&(buf[(c+SINE_EIGHTH+l_offset)*2]):
-//&(icing_overplay[stereoL((c+SINE_EIGHTH+l_offset)-(SINE_QUARTER*2))]);
-//
-		
+/*	
 			target_sample=&(buf[stereoL(c+SINE_EIGHTH+l_offset)]);
 			sample_int=*target_sample;
-					
-//			sample_int=buf[(SINE_EIGHTH+c+l_offset)*2];
 			sample_int+=icing[this_ice+octave]->eighth[c];
-			
 			if(sample_int>32767) sample_int=32767;
 			if(sample_int<-32768) sample_int=-32768;
-
 			*target_sample=sample_int;
-						
-//			buf[(SINE_EIGHTH+c+l_offset)*2]=sample_int;
+*/
+/// <- New Tinkle Volume Frame
+			sample_int=icing[this_ice+octave]->eighth[c];
+			sample_int=(sample_int*
+			front_info->vol[VOL_TINKLE])/100;
+			sample_int+=buf[stereoL(c+SINE_EIGHTH+l_offset)];
+					
+			if(sample_int>32767) sample_int=32767;
+			if(sample_int<-32768) sample_int=-32768;
 			
-//		target_sample=((c+SINE_EIGHTH+r_offset)<(SINE_QUARTER*2))
-//		?&(buf[((c+SINE_EIGHTH+r_offset)*2)+1]):
-//&(icing_overplay[stereoR((c+SINE_EIGHTH+r_offset)-(SINE_QUARTER*2))]);
+			buf[stereoL(c+SINE_EIGHTH+l_offset)]=sample_int;
+/// <- New Tinkle Frame (woof!  ssss...)*/
 
+/*
 			target_sample=&(buf[stereoR(c+SINE_EIGHTH+r_offset)]);
 			sample_int=*target_sample;
-
-
-//			sample_int=buf[((SINE_EIGHTH+c+r_offset)*2)+1];
 			sample_int+=icing[this_ice+octave]->eighth[c];
-			
+			if(sample_int>32767) sample_int=32767;
+			if(sample_int<-32768) sample_int=-32768;
+			*target_sample=sample_int;
+*/
+/// <- New Tinkle Volume Frame
+			sample_int=icing[this_ice+octave]->eighth[c];
+			sample_int=(sample_int*
+			front_info->vol[VOL_TINKLE])/100;
+			sample_int+=buf[stereoR(c+SINE_EIGHTH+r_offset)];
+					
 			if(sample_int>32767) sample_int=32767;
 			if(sample_int<-32768) sample_int=-32768;
 			
-			*target_sample=sample_int;
-
-//			buf[((SINE_EIGHTH+c+r_offset)*2)+1]=sample_int;
-
+			buf[stereoR(c+SINE_EIGHTH+r_offset)]=sample_int;
+/// <- New Tinkle Frame (woof!  ssss...)*/
 		}
 		break;
 
@@ -1199,11 +1215,14 @@ case 4:	 	octave=(rand()%2)*12;
 		
 		for(c=0;c<SINE_QUARTER*4;c++) {
 //			if((c+l_offset)<(SINE_QUARTER*2)) {  // *
-				sample_int=buf[(c+l_offset)*2]; // *
-				sample_int+=icing[this_ice+octave]->whole[c];
+				
+				sample_int=icing[this_ice+octave]->whole[c];
+				sample_int=(sample_int*
+				front_info->vol[VOL_TINKLE])/100;
+				sample_int+=buf[stereoL(c+l_offset)]; // *
 				if(sample_int>32767) sample_int=32767;
 				if(sample_int<-32768) sample_int=-32768;
-				buf[(c+l_offset)*2]=sample_int; // *
+				buf[stereoL(c+l_offset)]=sample_int; // *
 /*			} else {
 				if((c+l_offset)<((SINE_QUARTER*4)+ICING_OFFSET))
 				icing_overplay[((c+l_offset)-(SINE_QUARTER*2))*2]
@@ -1211,11 +1230,13 @@ case 4:	 	octave=(rand()%2)*12;
 			}	
 */			
 //			if((c+r_offset)<(SINE_QUARTER*2)) {
-				sample_int=buf[((c+r_offset)*2)+1]; // *
-				sample_int+=icing[this_ice+octave]->whole[c];
+				sample_int=icing[this_ice+octave]->whole[c];
+				sample_int=(sample_int*
+				front_info->vol[VOL_TINKLE])/100;
+				sample_int+=buf[stereoR(c+r_offset)]; // *
 				if(sample_int>32767) sample_int=32767;
 				if(sample_int<-32768) sample_int=-32768;
-				buf[((c+r_offset)*2)+1]=sample_int;
+				buf[stereoR(c+r_offset)]=sample_int; // *
 /*			} else {
 				if((c+r_offset)<((SINE_QUARTER*4)+ICING_OFFSET))
 				icing_overplay[(((c+r_offset)
@@ -1228,98 +1249,96 @@ case 4:	 	octave=(rand()%2)*12;
 	}
 
 
-		this_ice=ice_tones[rand()%ice_tones_index];
-//		if(c!=this_ice) {
-//			this_ice=c;
-//			break;
-//		}
-//	}
+	this_ice=ice_tones[rand()%ice_tones_index];
+
 	octave=(rand()%2)*12;
 	l_offset=(rand()%ICING_OFFSET);
 	r_offset=(rand()%ICING_OFFSET);
 	for(c=0;c<SINE_EIGHTH;c++) {
-
-//target_sample=((SINE_QUARTER+c+l_offset)<(SINE_QUARTER*2))?
-//		&(buf[(SINE_QUARTER+c+l_offset)*2]):
-//&(icing_overplay[stereoL((SINE_QUARTER+c+l_offset)-(SINE_QUARTER*2))]);
-
-
+/*
 		target_sample=&(buf[stereoL(c+l_offset)]);
 		sample_int=*target_sample;
-
-//		sample_int=buf[(SINE_QUARTER+c+l_offset)*2];
 		sample_int+=icing[this_ice+octave]->eighth[c];
-			
 		if(sample_int>32767) sample_int=32767;
 		if(sample_int<-32768) sample_int=-32768;
-			
 		*target_sample=sample_int;
-
-//		buf[(SINE_QUARTER+c+l_offset)*2]=sample_int;
+*/
+/// <- New Tinkle Volume Frame
+			sample_int=icing[this_ice+octave]->eighth[c];
+			sample_int=(sample_int*
+			front_info->vol[VOL_TINKLE])/100;
+			sample_int+=buf[stereoL(c+l_offset)];
+					
+			if(sample_int>32767) sample_int=32767;
+			if(sample_int<-32768) sample_int=-32768;
 			
-			
-//target_sample=((SINE_QUARTER+c+r_offset)<(SINE_QUARTER*2))?
-//		&(buf[((SINE_QUARTER+c+r_offset)*2)+1]):
-//&(icing_overplay[stereoR((SINE_QUARTER+c+r_offset)-(SINE_QUARTER*2))]);
+			buf[stereoL(c+l_offset)]=sample_int;
+/// <- New Tinkle Frame (woof!  ssss...)
 
+/*
 		target_sample=&(buf[stereoR(c+r_offset)]);
 		sample_int=*target_sample;
-//		sample_int=buf[((SINE_QUARTER+c+r_offset)*2)+1];
 		sample_int+=icing[this_ice+octave]->eighth[c];
-			
 		if(sample_int>32767) sample_int=32767;
 		if(sample_int<-32768) sample_int=-32768;
-
 		*target_sample=sample_int;
-//		buf[((SINE_QUARTER+c+r_offset)*2)+1]=sample_int;
-
+*/
+/// <- New Tinkle Volume Frame
+			sample_int=icing[this_ice+octave]->eighth[c];
+			sample_int=(sample_int*
+			front_info->vol[VOL_TINKLE])/100;
+			sample_int+=buf[stereoR(c+r_offset)];
+					
+			if(sample_int>32767) sample_int=32767;
+			if(sample_int<-32768) sample_int=-32768;
+			
+			buf[stereoR(c+r_offset)]=sample_int;
+/// <- New Tinkle Frame (woof!  ssss...)
 	}
-//	for(;;) {
-		this_ice=ice_tones[rand()%ice_tones_index];
-//		if(c!=this_ice) {
-//			this_ice=c;
-//			break;
-//		}
-//	}
+	this_ice=ice_tones[rand()%ice_tones_index];
+
 	octave=(rand()%2)*12;
 	l_offset=(rand()%ICING_OFFSET);
 	r_offset=(rand()%ICING_OFFSET);
 	for(c=0;c<SINE_EIGHTH;c++) {
-	
-//target_sample=((SINE_QUARTER+SINE_EIGHTH+c+l_offset)<(SINE_QUARTER*2))?
-//		&(buf[(SINE_QUARTER+SINE_EIGHTH+c+l_offset)*2]):
-//&(icing_overplay[stereoL((SINE_QUARTER+SINE_EIGHTH+c+l_offset)-(SINE_QUARTER*2))]);
-
-
+/*	
 		target_sample=&(buf[stereoL(c+l_offset)]);
 		sample_int=*target_sample;
-//		sample_int=buf[(SINE_QUARTER+SINE_EIGHTH+c-l_offset)*2];
 		sample_int+=icing[this_ice+octave]->eighth[c];
-			
 		if(sample_int>32767) sample_int=32767;
 		if(sample_int<-32768) sample_int=-32768;
-			
 		*target_sample=sample_int;
-		
-//		buf[(SINE_QUARTER+SINE_EIGHTH+c-l_offset)*2]=sample_int;
+*/		
+/// <- New Tinkle Volume Frame
+			sample_int=icing[this_ice+octave]->eighth[c];
+			sample_int=(sample_int*
+			front_info->vol[VOL_TINKLE])/100;
+			sample_int+=buf[stereoL(c+l_offset)];
+					
+			if(sample_int>32767) sample_int=32767;
+			if(sample_int<-32768) sample_int=-32768;
 			
-			
-//target_sample=((SINE_QUARTER+SINE_EIGHTH+c+r_offset)<(SINE_QUARTER*2))?
-//		&(buf[((SINE_QUARTER+SINE_EIGHTH+c+r_offset)*2)+1]):
-//&(icing_overplay[stereoR((SINE_QUARTER+SINE_EIGHTH+c+r_offset)-(SINE_QUARTER*2))]);
-
-
+			buf[stereoL(c+l_offset)]=sample_int;
+/// <- New Tinkle Frame (woof!  ssss...)
+/*
 		target_sample=&(buf[stereoR(c+r_offset)]);
 		sample_int=*target_sample;
-		
-//		sample_int=buf[((SINE_QUARTER+SINE_EIGHTH+c-r_offset)*2)+1];
 		sample_int+=icing[this_ice+octave]->eighth[c];
-			
 		if(sample_int>32767) sample_int=32767;
 		if(sample_int<-32768) sample_int=-32768;
-
 		*target_sample=sample_int;			
-//		buf[((SINE_QUARTER+SINE_EIGHTH+c-r_offset)*2)+1]=sample_int;
+*/
+/// <- New Tinkle Volume Frame
+			sample_int=icing[this_ice+octave]->eighth[c];
+			sample_int=(sample_int*
+			front_info->vol[VOL_TINKLE])/100;
+			sample_int+=buf[stereoR(c+r_offset)];
+					
+			if(sample_int>32767) sample_int=32767;
+			if(sample_int<-32768) sample_int=-32768;
+			
+			buf[stereoR(c+r_offset)]=sample_int;
+/// <- New Tinkle Frame (woof!  ssss...)
 
 	}
 }
@@ -1789,11 +1808,11 @@ fifth_variance_r=(rand()%(TRANSVERSE_VARIANCE-TRANS_VARIANCE_MIN)+TRANS_VARIANCE
 		if(sample_int_r<(BASS_PEAK*-1)) sample_int_r=(BASS_PEAK*-1);
 		
 		
-		sample_int_l*=(front_info->bass_vol);
-		sample_int_l/=FRONT_BASS_VOLUME;
+		sample_int_l*=(front_info->vol[VOL_BASS]);
+		sample_int_l/=100;
 		
-		sample_int_r*=(front_info->bass_vol);
-		sample_int_r/=FRONT_BASS_VOLUME;
+		sample_int_r*=(front_info->vol[VOL_BASS]);
+		sample_int_r/=100;
 	
 		sample_int_l+=buf[c*2];
 		sample_int_l+=buf[(c*2)+1];
@@ -2317,8 +2336,8 @@ if(have_drums) {
 			
 			sample_int=beatbuf[beat_index*2];
 			
-			sample_int*=(front_info->drum_vol);
-			sample_int/=FRONT_DRUM_VOLUME;
+			sample_int*=(front_info->vol[VOL_DRUMS]);
+			sample_int/=100;
 									
 			sample_int+=audio[c*2];
 			
@@ -2330,8 +2349,8 @@ if(have_drums) {
 			
 			sample_int=beatbuf[(beat_index*2)+1];
 
-			sample_int*=(front_info->drum_vol);
-			sample_int/=FRONT_DRUM_VOLUME;
+			sample_int*=(front_info->vol[VOL_DRUMS]);
+			sample_int/=100;
 								
 			sample_int+=audio[(c*2)+1];
 			
@@ -3451,6 +3470,8 @@ int	r_haas;
 		sample_int=((MID_BASE+mid_boost_square)*sample_int)/
 		MID_BOOST_MAX;
 		
+		sample_int=(sample_int*front_info->vol[VOL_BIP])/100;
+		
 		sample_int+=buf[stereoL(c+l_haas)];
 		
 		if(sample_int>32767)sample_int=32767;
@@ -3462,7 +3483,9 @@ int	r_haas;
 		
 		sample_int=((MID_BASE+mid_boost_square)*sample_int)/
 		MID_BOOST_MAX;
-		
+
+		sample_int=(sample_int*front_info->vol[VOL_BIP])/100;
+				
 		sample_int+=buf[stereoR(c+r_haas)];
 		
 		if(sample_int>32767)sample_int=32767;
@@ -3477,7 +3500,9 @@ int	r_haas;
 		
 		sample_int=((MID_BASE+mid_boost_cosine)*sample_int)/
 		MID_BOOST_MAX;
-		
+
+		sample_int=(sample_int*front_info->vol[VOL_BIP])/100;
+				
 		sample_int+=buf[stereoL(c+l_haas)];
 		
 		if(sample_int>32767)sample_int=32767;
@@ -3489,7 +3514,9 @@ int	r_haas;
 		
 		sample_int=((MID_BASE+mid_boost_cosine)*sample_int)/
 		MID_BOOST_MAX;
-		
+
+		sample_int=(sample_int*front_info->vol[VOL_BIP])/100;
+				
 		sample_int+=buf[stereoR(c+r_haas)];
 		
 		if(sample_int>32767)sample_int=32767;
@@ -3504,7 +3531,9 @@ int	r_haas;
 		
 		sample_int=((MID_BASE+mid_boost_sawtooth)*sample_int)/
 		MID_BOOST_MAX;
-		
+
+		sample_int=(sample_int*front_info->vol[VOL_BIP])/100;
+				
 		sample_int+=buf[stereoL(c+l_haas)];
 		
 		if(sample_int>32767)sample_int=32767;
@@ -3516,7 +3545,9 @@ int	r_haas;
 		
 		sample_int=((MID_BASE+mid_boost_sawtooth)*sample_int)/
 		MID_BOOST_MAX;
-		
+
+		sample_int=(sample_int*front_info->vol[VOL_BIP])/100;
+				
 		sample_int+=buf[stereoR(c+r_haas)];
 		
 		if(sample_int>32767)sample_int=32767;
@@ -3579,7 +3610,12 @@ int	r_haas;
 		sample_int+=freq[tone]->quarter[0].fifth[c*4];
 
 		sample_int/=10;
-				
+
+		sample_int=sample_int*sample_int;
+		
+		
+		sample_int=(sample_int*front_info->vol[VOL_BEEP])/100;
+						
 		l_haas=rand()%BACKUP_HAAS;
 		r_haas=rand()%BACKUP_HAAS;
 		
@@ -3609,7 +3645,8 @@ short	*buf;
 int	c;
 
 	for(c=0;c<4;c++) {
-		place_backup_sequence(tone,&(buf[c*SINE_EIGHTH]));
+		place_backup_sequence(tone,
+		&(buf[c*SINE_EIGHTH*2*sizeof(short)]));
 	}
 }
 

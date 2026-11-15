@@ -82,6 +82,15 @@ char		*tone_set_str();	// Formatter of the list of tones
 					// to be the usable set.
 
 
+char	*vol_label[] = {
+	"drums",
+	"bass",
+	"tinkle",
+	"filler-rough",
+	"filler-smooth",
+	"mid-beep",
+	"mid-boop" };
+	
 
 // the everything text buffer.  Called playcmd for historical reasons that are
 // humourous to me.  It really was for a shell command in a completely different
@@ -212,6 +221,7 @@ int		dat_fd;
 // Is this either the actual initialzation or possibly a post silence period?
 bool		first_run;
 
+int		vol_arg;
 
 // Related to the timer and planned finishes
 
@@ -309,9 +319,11 @@ struct sigaction sa;
 		front_info->note_history[c].played_at=NANONANO;
 	}
 
-	front_info->bass_vol=FRONT_BASS_VOLUME;
-	front_info->drum_vol=FRONT_DRUM_VOLUME;
+//	front_info->bass_vol=FRONT_BASS_VOLUME;
+//	front_info->drum_vol=FRONT_DRUM_VOLUME;
 
+	for(c=0;c<VOL_MAX;c++) front_info->vol[c]=VOL_DEFAULT;
+	
 // misc other initializing
 	rate=48000;
 	synth_ready=false;
@@ -336,7 +348,7 @@ struct sigaction sa;
 	
 	drum_arg=NULL;
 	found_bass_vol=false;
-	arg_limit=5;
+	arg_limit=10;
 	a_bpm=-1;
 //	actual_end=-1;
 /*
@@ -345,40 +357,11 @@ struct sigaction sa;
 	count_high=0;
 */					
 // A loop to try to parse the command line arguments in a not too rigid way.
+	vol_arg=0;
+
 	if(argc>1) for(c=1;c<argc;c++) {
 		printf("%s...let's see what that is: ",argv[c]);
-/*
-		d=sscanf(argv[c],"%ld:%2ld",&end_minutes,&end_seconds);
-		if(d==2) {
-			printf("It's an end marker.\n");
-			actual_end=(60*end_minutes)+end_seconds;
-			if(c<arg_limit) continue;
-			else break;
-		}
-*/
-		// d=atoi(argv[c]);
-		for(d=0;d<strlen(argv[c]);d++) if(!isdigit(argv[c][d])) break;
-		
-		if(d==strlen(argv[c])) {
-		d=atoi(argv[c]);
-		if(
-		(strlen(argv[c])<4) &&
-		(d>=0)
-		&&
-		(d<=100)) {
-			printf("It's volume - assigning to ");
-			if(!found_bass_vol) {
-				printf("bass synth.\n");
-				found_bass_vol=true;
-				front_info->bass_vol=(d/5)*5;
-			} else {
-				printf("drums.\n");
-				front_info->drum_vol=(d/5)*5;
-			}
-			if(c<arg_limit)continue;
-			else break;
-		}
-		}
+
 		if(argv[c][0]=='b'&&((strlen(argv[c])-1)<4)) {
 			d=atoi(&(argv[c][1]));
 			if((d>=BPM_MIN)&&(d<=BPM_MAX)) {
@@ -388,7 +371,7 @@ struct sigaction sa;
 				else break;		
 			}
 		}
-		
+
 		if(drum_arg==NULL) {
 			dat_fd=open(argv[c],O_RDONLY);
 			if(dat_fd!=-1) {
@@ -398,6 +381,34 @@ struct sigaction sa;
 				else break;
 			}
 		}
+				
+		for(d=0;d<strlen(argv[c]);d++) if(!isdigit(argv[c][d])) break;
+		
+		if(d==strlen(argv[c])) {
+		d=atoi(argv[c]);
+		if(
+		(strlen(argv[c])<4) &&
+		(d>=0)
+		&&
+		(d<=500) &&
+		(vol_arg<VOL_MAX)) {
+			printf("It's volume - assigning to %s.\n",
+			vol_label[vol_arg]);
+			front_info->vol[vol_arg]=d;
+			vol_arg++;
+		/*	if(!found_bass_vol) {
+				printf("bass synth.\n");
+				found_bass_vol=true;
+				front_info->vol[VOL_BASS]=d;
+			} else {
+				printf("drums.\n");
+				front_info->vol[VOL_DRUMS]=d;
+			} */
+			if(c<arg_limit)continue;
+			else break;
+		}
+		}
+
 		printf("It's not a volume or a readable file or otherwise useful.\n");
 		++arg_limit;			
 	}	

@@ -75,3 +75,26 @@ all that shit.
 
 -- push was here
 
+Nov 15
+
+Fixed an error in the last commit that caused the icing voice to be wiped out
+of the right channel.  The fix changed one of the new voices but that's fine,
+it can stand the way it is.
+
+Added volume controls to argv for a total of 7.  They are to be integers from
+0-500.  Higher numbers result in distortion but that's fine.  I made it to 
+simulate analog distortion rather than just let it wrap-around digital 
+distort, so that can sound pretty good.  The voices in order are:
+
+Drums
+Bass
+Tinkle
+Fill Rough
+Fill Smooth
+Mid Chirpy Sound
+Other Mid Sequence
+
+Not the greatest descriptions to be sure but you can find out experimentally which number does what thing.  Sorry, I just don't know what to call this shit.
+
+--push was here
+
