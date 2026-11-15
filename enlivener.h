@@ -313,8 +313,7 @@ typedef struct {
 	bool	reached_end;
 	int	tones[3];
 	int	bpm;
-//	int	bass_vol;
-//	int	drum_vol;	
+	int	channel_mix;
 	int	vol[VOL_MAX];
 	int		note_history_index;
 	NOTE_HISTORY	note_history[NOTE_HISTORY_LIMIT];

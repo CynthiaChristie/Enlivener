@@ -253,6 +253,8 @@ int		arg_limit;
 // a frequently updated object to hold the number of terminal columns
 int	columns;
 
+
+
 // As we transition to the code, the following two items, the declaration and 
 // the sigaction(), are just so this app doesn't risk leaving behind zombie
 // tasks.
@@ -345,10 +347,12 @@ struct sigaction sa;
 	a_bpm=-1;
 	
 	dat_fd=-1;
-	
+
+	front_info->channel_mix=0;
+		
 	drum_arg=NULL;
 	found_bass_vol=false;
-	arg_limit=10;
+	arg_limit=11;
 	a_bpm=-1;
 //	actual_end=-1;
 /*
@@ -372,6 +376,16 @@ struct sigaction sa;
 			}
 		}
 
+		if(argv[c][0]=='m'&&((strlen(argv[c])-1)<3)) {
+			d=atoi(&(argv[c][1]));
+			if((d>0)&&(d<50)) {
+				printf("It's a channel mix percentage.\n");
+				front_info->channel_mix=d;
+				if(c<arg_limit)continue;
+				else break;		
+			}
+		}
+		
 		if(drum_arg==NULL) {
 			dat_fd=open(argv[c],O_RDONLY);
 			if(dat_fd!=-1) {

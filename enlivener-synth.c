@@ -250,6 +250,46 @@ void		mid_set_note();
 void		place_backup_fill();
 void		place_backup_note();
 void		place_backup_sequence();
+void		channel_mix();
+
+void channel_mix(buf,len)
+short	*buf;
+int	len;
+{
+int	c;
+
+int	sample_int_l, sample_int_r;
+
+int	mix_l, mix_r;
+
+int	no_mix;
+
+	no_mix=100-front_info->channel_mix;
+	
+	for(c=0;c<len;c++) {
+
+		sample_int_l=buf[stereoL(c)];
+		sample_int_r=buf[stereoR(c)];
+
+		mix_l=(sample_int_l*front_info->channel_mix)/100;
+		mix_r=(sample_int_r*front_info->channel_mix)/100;
+		
+		sample_int_l=(sample_int_l*no_mix)/100;
+		sample_int_r=(sample_int_r*no_mix)/100;
+		
+		sample_int_l+=mix_r;
+		sample_int_r+=mix_l;
+		
+		if(sample_int_l>32767)sample_int_l=32767;
+		if(sample_int_l<-32768)sample_int_l=-32768;
+		
+		if(sample_int_r>32767)sample_int_r=32767;
+		if(sample_int_r<-32768)sample_int_r=-32768;
+		
+		buf[stereoL(c)]=sample_int_l;
+		buf[stereoR(c)]=sample_int_r;
+	}
+}
 
 void fill_sequence(buf,top_tones)
 short	*buf;
@@ -2688,6 +2728,9 @@ for(;;) {
 	
 	play_something(use_tones);
 
+	if(front_info->channel_mix>0) 
+	channel_mix(quiet?audio:mixbuf,SINE_HALF);
+	
 pa_simple_write(pa_index_out,quiet?audio:mixbuf,
 ((SINE_QUARTER*2))*sizeof(short)
 *(stereo?2:1),&pa_err);
